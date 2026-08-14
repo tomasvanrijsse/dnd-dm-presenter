@@ -38,12 +38,12 @@ useHead({
         <img
           :src="npc.image"
           :alt="npc.name"
-          class="block min-h-0 w-full flex-1 object-cover"
+          class="block min-h-0 w-full flex-1 object-contain"
         >
 
         <div
           v-if="isIntroduced(npc.id)"
-          class="tangerine-bold shrink-0 bg-white py-1 text-center text-5xl text-black"
+          class="tangerine-bold shrink-0 bg-white py-1 text-center text-3xl text-black"
         >
           {{ npc.name }}
         </div>

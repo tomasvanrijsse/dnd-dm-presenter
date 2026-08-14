@@ -57,16 +57,6 @@ function pointsClass(value: number): string {
 
       <div class="flex items-center gap-2">
         <UButton
-          to="/present"
-          target="_blank"
-          color="neutral"
-          variant="subtle"
-          icon="i-lucide-monitor"
-        >
-          Open display
-        </UButton>
-
-        <UButton
           color="neutral"
           variant="subtle"
           :icon="everyoneAway ? 'i-lucide-user-check' : 'i-lucide-user-x'"

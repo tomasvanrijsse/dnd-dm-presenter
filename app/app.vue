@@ -1,4 +1,6 @@
 <script setup>
+const route = useRoute()
+
 useHead({
   meta: [
     { name: 'viewport', content: 'width=device-width, initial-scale=1' }
@@ -24,6 +26,8 @@ useSeoMeta({
 
 <template>
   <UApp>
+    <AppNav v-if="route.path !== '/present'" />
+
     <UMain>
       <NuxtPage />
     </UMain>

@@ -109,6 +109,28 @@ export const npcs: Npc[] = [
     }
   },
   {
+    id: 'miriel',
+    name: 'Miriel',
+    image: '/NPCs/miriel.jpg',
+    gender: 'female',
+    info: {
+      role: 'Female half-elf bridesmaid, niece to Lÿsandrea’s mother and so her cousin',
+      appearance: 'Miriel is warm and quick to laugh, with tightly curled hair pinned up with flowers to match the wedding colours. Her pointed ears and slender build betray the elven blood she inherited from her aunt’s side of the family, just like Lÿsandrea’s. She wears the bridesmaid’s gown chosen by Lÿsandrea and fusses over every small detail of the day, from seating charts to the placement of the flowers.',
+      gear: 'Miriel carries no weapon, only a small embroidered clutch with smelling salts, spare hairpins, and a handkerchief.',
+      trait: 'I notice everyone’s mood before they’ve said a word, and I can’t help but try to fix it.',
+      ideal: 'Family. The people I love come before any occasion, however grand. (Good)',
+      bond: 'Lÿsandrea is more sister than cousin to me, and I’d do anything to see her happy.',
+      flaw: 'I fuss so much over everyone else’s happiness that I rarely notice my own worries.',
+      sections: [
+        { title: 'Information', body: 'Miriel is Lÿsandrea’s cousin on her mother’s side, and the two were raised almost like sisters. She was overjoyed to be asked to stand as bridesmaid, and fusses cheerfully over the wedding’s details, happy to gossip about the guests, though she means no harm by it.' },
+        { title: 'What she lies about', body: 'Miriel insists to anyone who asks that the wedding is going perfectly and that Lÿsandrea has never looked happier, mostly to keep the mood light and stop guests from prying.' },
+        { title: 'What she hides', body: 'Miriel privately worries that Lÿsandrea is not as excited about the marriage as she lets on, but she keeps this worry to herself rather than add to her cousin’s stress on the wedding day.' },
+        { title: 'Motive for murder', body: 'Miriel has no motive whatsoever to want Maximillian dead and is horrified by the murder, mostly worried about how it will affect her cousin.' },
+        { title: 'How to vex or woo her', body: 'Miriel warms instantly to anyone who is kind to Lÿsandrea or compliments the wedding preparations. She is quick to grow flustered and short-tempered with guests who are rude to the staff or dismissive of the bride.' }
+      ]
+    }
+  },
+  {
     id: 'maximillian-darlington',
     name: 'Maximillian D\'arlington',
     image: '/NPCs/Maximillian-D\'arlington.jpg',

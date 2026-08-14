@@ -7,16 +7,30 @@ import { AWAY_SLOT, COUPLE_SLOTS, DANCING_ROUNDS, NOT_DANCING_SLOT, useDancingRo
 const { hydrated, participantsInSlot, assign } = useDancingRounds()
 
 const participants = computed(() => [
-  ...players.map(player => ({ id: player.id, name: player.name })),
-  ...npcs.filter(npc => npc.id !== 'dizzy-the-dragon').map(npc => ({ id: npc.id, name: npc.name.split(' ')[0] }))
+  ...players.map(player => ({ id: player.id, name: player.name, gender: player.gender })),
+  ...npcs
+    .filter(npc => npc.id !== 'dizzy-the-dragon')
+    .map(npc => ({ id: npc.id, name: npc.name.split(' ')[0], gender: npc.gender }))
 ])
 
 const participantIds = computed(() => participants.value.map(participant => participant.id))
 
 const rounds = Array.from({ length: DANCING_ROUNDS }, (_, index) => index + 1)
 
+const CHIP_BASE = 'cursor-grab select-none whitespace-nowrap rounded-full px-2 py-1 text-xs active:cursor-grabbing'
+const GENDER_CHIP_CLASS = {
+  female: 'bg-rose-100 text-rose-900 dark:bg-rose-950/40 dark:text-rose-200',
+  male: 'bg-sky-100 text-sky-900 dark:bg-sky-950/40 dark:text-sky-200'
+}
+
 function nameFor(participantId: string): string {
   return participants.value.find(participant => participant.id === participantId)?.name ?? participantId
+}
+
+function chipClass(participantId: string): string {
+  const gender = participants.value.find(participant => participant.id === participantId)?.gender ?? 'male'
+
+  return `${CHIP_BASE} ${GENDER_CHIP_CLASS[gender]}`
 }
 
 function danceFor(round: number) {
@@ -148,7 +162,7 @@ function onDrop(event: DragEvent, round: number, slotId: string): void {
                   v-for="participantId in participantsInSlot(round, NOT_DANCING_SLOT, participantIds)"
                   :key="participantId"
                   draggable="true"
-                  class="cursor-grab select-none whitespace-nowrap rounded-full bg-elevated px-2 py-1 text-xs text-highlighted active:cursor-grabbing"
+                  :class="chipClass(participantId)"
                   @dragstart="onDragStart($event, round, participantId)"
                 >
                   {{ nameFor(participantId) }}
@@ -168,7 +182,7 @@ function onDrop(event: DragEvent, round: number, slotId: string): void {
                   v-for="participantId in participantsInSlot(round, slotId, participantIds)"
                   :key="participantId"
                   draggable="true"
-                  class="cursor-grab select-none whitespace-nowrap rounded-full bg-primary/15 px-2 py-1 text-xs text-primary active:cursor-grabbing"
+                  :class="chipClass(participantId)"
                   @dragstart="onDragStart($event, round, participantId)"
                 >
                   {{ nameFor(participantId) }}
@@ -186,7 +200,7 @@ function onDrop(event: DragEvent, round: number, slotId: string): void {
                   v-for="participantId in participantsInSlot(round, AWAY_SLOT, participantIds)"
                   :key="participantId"
                   draggable="true"
-                  class="cursor-grab select-none whitespace-nowrap rounded-full bg-elevated px-2 py-1 text-xs text-dimmed active:cursor-grabbing"
+                  :class="[chipClass(participantId), 'opacity-60']"
                   @dragstart="onDragStart($event, round, participantId)"
                 >
                   {{ nameFor(participantId) }}

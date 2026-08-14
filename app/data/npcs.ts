@@ -9,10 +9,13 @@ export interface NpcInfo {
   sections: { title: string, body: string }[]
 }
 
+export type Gender = 'female' | 'male'
+
 export interface Npc {
   id: string
   name: string
   image: string
+  gender: Gender
   info: NpcInfo
 }
 
@@ -21,6 +24,7 @@ export const npcs: Npc[] = [
     id: 'lysandrea-isillionthe',
     name: 'Lysandrea Isillionthe',
     image: '/NPCs/Lysandrea-Isillionthe.jpg',
+    gender: 'female',
     info: {
       role: 'Female half-elf noble (LN)',
       appearance: 'Lÿsandrea (or Lÿs as her close friends call her) has long, brown curly hair and a heart-shaped face. A sprinkle of freckles covers her nose, and her elven heritage is evident in her slender shape and pointed ears. Lÿsandrea wears a traditional elven bridal gown, a sleeveless and loosely cut white dress decorated with silver embroidery. Her curly hair is arranged with multiple pearl-studded pins. Lÿsandrea has been persuaded by her family to marry Maximillian D’arlington, but he has no place in her heart. However, during the courtship when the families spent plenty of time together, Lÿsandrea and Sirbastien, Maximillian’s younger brother, secretly fell in love with each other.',
@@ -42,6 +46,7 @@ export const npcs: Npc[] = [
     id: 'galianne-isillionthe-fitzgilbert',
     name: 'Galianne Isillionthe Fitzgilbert',
     image: '/NPCs/Galianne-Isillionthe-Fitzgilbert.jpg',
+    gender: 'female',
     info: {
       role: 'Female half-elf noble (LN)',
       appearance: 'Galïanne is willowy and has sharp cheekbones and long, brown hair. She is dressed in a traditional elven dress in dark grey with a silvery sash belt. A silver circlet with empty sockets rests on her head, and she also wears a mourning ring with a braided strand of hair. The grey dress and the empty sockets indicate that someone close to her has died within the past five years. Indeed, Galïanne became a widow three years ago when her husband, Jonah FitzGilbert, passed away.',
@@ -63,6 +68,7 @@ export const npcs: Npc[] = [
     id: 'thalgion-isillionthe',
     name: 'Thalgion Isillionthe',
     image: '/NPCs/Thalgion-Isillionthe.jpg',
+    gender: 'male',
     info: {
       role: 'Male high elf knight (LN), distant cousin to Lÿsandrea and Galïanne',
       appearance: 'Thalgion is slender and has elegant features and captivating almond-shaped eyes. Thalgion wears a traditional elven costume that features a high-collared silk shirt, tailored wide-sleeved robe, and an embroidered long dark blue cloak. His long hair is neat, and he wears a silver circlet that indicates that he is a member of the high elven court. Thalgion is serious, reserved, and speaks articulately with a melodious elven accent.',
@@ -84,6 +90,7 @@ export const npcs: Npc[] = [
     id: 'roslinda-brynborn',
     name: 'Roslinda Brynborn',
     image: '/NPCs/Roslinda-Brynborn.jpg',
+    gender: 'female',
     info: {
       role: 'Female gnome mage (CG) who can only cast spells up to 2nd level',
       appearance: 'Roslinda is short, curvy, and has blond hair with natural cupcake pink highlights. She has large eyes and a small gap between her front teeth. On her chin is a faded scar from a childhood accident. Roslinda wears a yellow ballgown with puff sleeves and layers of tulle, which is a gift from Lÿsandrea. Roslinda also carries a velvet pouch that she has sewn and embroidered herself. Roslinda used to work in the kitchen for the Isillionthë family. Despite their different stations, Roslinda and Lÿsandrea became close friends. Lÿsandrea’s father disapproved of their friendship, but eventually decided to hire Roslinda as a lady companion to stop gossip about his daughter’s ill-favoured tendency to mingle with servants.',
@@ -105,6 +112,7 @@ export const npcs: Npc[] = [
     id: 'maximillian-darlington',
     name: 'Maximillian D\'arlington',
     image: '/NPCs/Maximillian-D\'arlington.jpg',
+    gender: 'male',
     info: {
       role: 'Male human noble (N)',
       appearance: 'Maximillian is tall and good-looking, and his dark eyes make ladies and gentlemen alike swoon over him. Maximillian has naturally coiled hair and a well-trimmed beard. He always wears the latest noble fashion. For the wedding he is dressed in a purple coat trimmed with gold with puffed arms, a matching lilac cloak, tailored trousers, and high boots. Maximillian wasn’t born with a silver spoon in his mouth – he was born with a ruby-studded golden spoon between his lips and nothing else would ever do. As the firstborn, he was doted endlessly upon by his hypochondriac mother, while his father was single-mindedly proud of him regardless of Maximillian’s actions or achievements. However, Maximillian’s father died in an accident, so Maximillian inherited his lordship title and the grand manor together with the full responsibility for the family’s affairs when he was only fifteen years old.',
@@ -126,6 +134,7 @@ export const npcs: Npc[] = [
     id: 'sirbastien-darlington',
     name: 'Sirbastien D\'arlington',
     image: '/NPCs/Sirbastien-D\'arlington.jpg',
+    gender: 'male',
     info: {
       role: 'Male human noble (NG), younger brother to Lord Maximillian D’arlington',
       appearance: 'Like his brother, Sirbastien is tall and has curly, dark-brown hair, and he has a neatly trimmed short beard. He wears the finest noble’s clothes and a sky-blue cape. Despite his elegant clothes and fine upbringing, Sirbastien is ill at ease among strangers and in large gatherings. The D’arlington and Isillionthë families spent considerable time together during the courting period, which was when Sirbastien got to know Lÿsandrea better. Against his own wishes – and better judgement – Sirbastien has fallen in love with Lÿsandrea, and he is now torn between duty and his heart’s desire.',
@@ -147,6 +156,7 @@ export const npcs: Npc[] = [
     id: 'lillian-darlington',
     name: 'Lillian D\'arlington',
     image: '/NPCs/Lillian-D\'arlington.jpg',
+    gender: 'female',
     info: {
       role: 'Female half-orc noble (NG)',
       appearance: 'Lillian is strong and athletic, and her auburn hair is curled in ringlets. Lillian wears a stunning evening gown in the latest fashion with elbow gloves, and she carries a fan featuring a hand-painted motif of a dashing hunting scene. Lillian is the youngest of the D’arlington siblings and was adopted as a baby. Initially, Lord and Lady D’arlington were her godparents. However, when Lillian’s biological parents died in quick succession from a fever, she was sent to the D’arlingtons. Lord and Lady D’arlington could have kept Lillian as a ward, but they decided almost immediately to welcome her into their family. Lady D’arlington had always wanted a daughter, and Lord D’arlington felt sorry for the infant girl to become an orphan at such a young age. Lillian shares her brother Maximillian’s love for hunting, and she keeps several falcons and riding horses. Like Sirbastien, Lillian has a keen interest in art and books. However, she finds balls, lavish parties, and social events immensely boring. As the youngest sibling and the only daughter, Lillian is in fact rather spoiled, but she is also open-minded, generous, and courageous.',
@@ -168,6 +178,7 @@ export const npcs: Npc[] = [
     id: 'milton-fiends',
     name: 'Milton Fiends',
     image: '/NPCs/Milton-Fiends.jpg',
+    gender: 'male',
     info: {
       role: 'Male tiefling bandit captain (CN), Maximillian’s manservant',
       appearance: 'Milton is as handsome as the devil himself. He has raven-black hair, curved horns, and red eyes that reflect light in the dark. He wears a spotless servant’s livery with a cream-coloured frock coat, tailored trousers, and boots that are so immaculately polished you can see your own reflection in them. Despite his proper appearance, Milton has a chequered past. He used to be an urchin who worked as a street charlatan for many years in Northwind Gate. After double-crossing the wrong people, Milton was forced to flee the town. He stole a footman’s outfit and sought work as a servant in a different town to keep a low profile. Much to his surprise, Milton realised that he liked his new profession and never looked back.',
@@ -189,6 +200,7 @@ export const npcs: Npc[] = [
     id: 'morgen-lavender',
     name: 'Morgen Lavender',
     image: '/NPCs/Morgen-Lavender.jpg',
+    gender: 'male',
     info: {
       role: 'Male human bard (CN), uses the statistics of a spy',
       appearance: 'Morgen Lavender is a charming but somewhat sarcastic people-pleaser who loves music. Morgen has ruffled blond hair, a crooked smile, and winks frequently. He wears elegant travelling clothes and high boots, and he is especially fond of his velvet minstrel’s cloak. Morgen is an exceedingly talented musician and poet, with a vast repertoire of old stories, songs, and legends. He is self-taught and plays several instruments, including the lute, fiddle harp, and flute.',
@@ -210,6 +222,7 @@ export const npcs: Npc[] = [
     id: 'dizzy-the-dragon',
     name: 'Dizzy the Dragon',
     image: '/NPCs/Dizzy-the-Dragon.jpg',
+    gender: 'female',
     info: {
       role: 'Blue pseudodragon (NG)',
       appearance: 'Dizzy is the size of a cat and has long claws, a spiney tail, and slanted amber eyes. Dizzy lives at Silver Lodge and can often be found sleeping on a book on the highest shelf in the library. She is a decidedly curious creature and loves knowledge, comfortable tomes, and bards’ tales and legends. Dizzy was summoned by a mage over three centuries ago. She served as a familiar for many years until the mage grew rather mad and unpleasant. A group of heroes killed the power-hungry mage before he could carry out his sinister master plan, which included slaying or enslaving people in the region. When the mage’s library was looted, Dizzy hid among the books in the crates. When the previous owner of Silver Lodge bought some of the old mage’s books in an auction in Northwind Gate, Dizzy eventually ended up at Silver Lodge. Since then, Dizzy has lived a comfortable life in the library. She is displeased with the elven-themed renovations that have been carried out, but luckily Lÿsandrea’s mother decided that the old library, including all its dusty old books and many nooks and crannies, should be left intact.',

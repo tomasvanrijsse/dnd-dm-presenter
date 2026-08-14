@@ -2,7 +2,7 @@
 import { npcs } from '~/data/npcs'
 import { players } from '~/data/players'
 
-const { hydrated, pointsFor, adjust, totalForPlayer, totalForNpc, reset } = useAdmirationGrid()
+const { hydrated, pointsFor, adjust, isAway, toggleAway, totalForPlayer, totalForNpc, reset } = useAdmirationGrid()
 
 const npcIds = npcs.map(npc => npc.id)
 const playerIds = players.map(player => player.id)
@@ -35,7 +35,8 @@ function pointsClass(value: number): string {
           Admiration Matrix
         </h1>
         <p class="text-sm text-muted">
-          Admiration points each NPC holds for each player. Saved in this browser, synced across windows.
+          Admiration points each NPC holds for each player. Send an NPC away to lock their row. Saved in this browser,
+          synced across windows.
         </p>
       </div>
 
@@ -74,6 +75,7 @@ function pointsClass(value: number): string {
             v-for="npc in npcs"
             :key="npc.id"
             class="border-b border-default last:border-b-0 hover:bg-elevated/30"
+            :class="hydrated && isAway(npc.id) ? 'bg-elevated/20' : ''"
           >
             <th class="sticky left-0 z-10 bg-default px-4 py-2 text-left font-medium">
               <div class="flex items-center gap-3">
@@ -81,8 +83,33 @@ function pointsClass(value: number): string {
                   :src="npc.image"
                   :alt="npc.name"
                   size="lg"
+                  :class="hydrated && isAway(npc.id) ? 'grayscale opacity-50' : ''"
                 />
-                <span class="text-highlighted whitespace-nowrap">{{ npc.name }}</span>
+                <span
+                  class="whitespace-nowrap"
+                  :class="hydrated && isAway(npc.id) ? 'text-dimmed line-through' : 'text-highlighted'"
+                >
+                  {{ npc.name }}
+                </span>
+
+                <UBadge
+                  v-if="hydrated && isAway(npc.id)"
+                  color="neutral"
+                  variant="subtle"
+                  size="sm"
+                >
+                  Away
+                </UBadge>
+
+                <UButton
+                  :icon="hydrated && isAway(npc.id) ? 'i-lucide-user-check' : 'i-lucide-user-x'"
+                  color="neutral"
+                  variant="ghost"
+                  size="xs"
+                  class="ml-auto"
+                  :aria-label="hydrated && isAway(npc.id) ? `Bring ${npc.name} back` : `Send ${npc.name} away`"
+                  @click="toggleAway(npc.id)"
+                />
               </div>
             </th>
 
@@ -93,6 +120,7 @@ function pointsClass(value: number): string {
             >
               <div class="flex items-center justify-center gap-1">
                 <UButton
+                  v-if="!hydrated || !isAway(npc.id)"
                   icon="i-lucide-minus"
                   color="neutral"
                   variant="ghost"
@@ -102,11 +130,12 @@ function pointsClass(value: number): string {
                 />
                 <span
                   class="w-8 text-base font-semibold tabular-nums"
-                  :class="pointsClass(pointsFor(npc.id, player.id))"
+                  :class="hydrated && isAway(npc.id) ? 'text-dimmed' : pointsClass(pointsFor(npc.id, player.id))"
                 >
                   {{ hydrated ? pointsFor(npc.id, player.id) : '–' }}
                 </span>
                 <UButton
+                  v-if="!hydrated || !isAway(npc.id)"
                   icon="i-lucide-plus"
                   color="neutral"
                   variant="ghost"

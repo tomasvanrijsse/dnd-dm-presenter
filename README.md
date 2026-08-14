@@ -8,12 +8,15 @@ The home page (`/`) is a grid of the 11 NPCs (rows) against the 3 players (colum
 admiration points that NPC holds for that player. Points can go negative.
 
 - `-` / `+` adjust a cell by 1.
+- The user icon at the end of an NPC row sends that NPC away: the row is greyed out and its `-` / `+` buttons
+  disappear, so their points cannot be changed while they are off screen. Existing points stay visible and keep
+  counting towards the totals. Click the icon again to bring them back.
 - The right column totals a single NPC's admiration across all players.
 - The bottom row totals a single player's admiration across all NPCs.
-- **Reset all** clears every cell.
+- **Reset all** clears every cell. It leaves the away flags alone.
 
-State lives in `localStorage` under `dnd-wedding:admiration-points`, so it survives a reload and stays in sync between
-browser windows on the same machine. It is not shared across machines or browsers.
+State lives in `localStorage` under `dnd-wedding:admiration-points` and `dnd-wedding:away-npcs`, so it survives a
+reload and stays in sync between browser windows on the same machine. It is not shared across machines or browsers.
 
 To change the cast, edit `app/data/npcs.ts` (images live in `public/NPCs`) and `app/data/players.ts`.
 

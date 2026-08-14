@@ -1,9 +1,12 @@
-const STORAGE_KEY = 'dnd-wedding:admiration-points'
+const POINTS_KEY = 'dnd-wedding:admiration-points'
+const AWAY_KEY = 'dnd-wedding:away-npcs'
 
 type AdmirationPoints = Record<string, number>
+type AwayNpcs = Record<string, boolean>
 
 export function useAdmirationGrid() {
   const points = useState<AdmirationPoints>('admiration-points', () => ({}))
+  const away = useState<AwayNpcs>('away-npcs', () => ({}))
   const hydrated = useState<boolean>('admiration-points-hydrated', () => false)
 
   function pointsFor(npcId: string, playerId: string): number {
@@ -16,7 +19,16 @@ export function useAdmirationGrid() {
 
   function setPoints(npcId: string, playerId: string, value: number): void {
     points.value = { ...points.value, [cellKey(npcId, playerId)]: value }
-    persist()
+    persistPoints()
+  }
+
+  function isAway(npcId: string): boolean {
+    return away.value[npcId] === true
+  }
+
+  function toggleAway(npcId: string): void {
+    away.value = { ...away.value, [npcId]: !isAway(npcId) }
+    window.localStorage.setItem(AWAY_KEY, JSON.stringify(away.value))
   }
 
   function totalForPlayer(playerId: string, npcIds: string[]): number {
@@ -29,11 +41,12 @@ export function useAdmirationGrid() {
 
   function reset(): void {
     points.value = {}
-    persist()
+    persistPoints()
   }
 
   onMounted(() => {
-    points.value = read()
+    points.value = readPoints()
+    away.value = readAway()
     hydrated.value = true
 
     window.addEventListener('storage', onStorage)
@@ -44,42 +57,58 @@ export function useAdmirationGrid() {
   })
 
   function onStorage(event: StorageEvent): void {
-    if (event.key !== STORAGE_KEY) {
-      return
+    if (event.key === POINTS_KEY) {
+      points.value = readPoints()
     }
 
-    points.value = read()
-  }
-
-  function read(): AdmirationPoints {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-
-    if (!raw) {
-      return {}
-    }
-
-    try {
-      const parsed: unknown = JSON.parse(raw)
-
-      return isAdmirationPoints(parsed) ? parsed : {}
-    } catch {
-      return {}
+    if (event.key === AWAY_KEY) {
+      away.value = readAway()
     }
   }
 
-  function persist(): void {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(points.value))
+  function readPoints(): AdmirationPoints {
+    return readRecord(POINTS_KEY, isAdmirationPoints)
   }
 
-  return { points, hydrated, pointsFor, adjust, setPoints, totalForPlayer, totalForNpc, reset }
+  function readAway(): AwayNpcs {
+    return readRecord(AWAY_KEY, isAwayNpcs)
+  }
+
+  function persistPoints(): void {
+    window.localStorage.setItem(POINTS_KEY, JSON.stringify(points.value))
+  }
+
+  return { points, away, hydrated, pointsFor, adjust, setPoints, isAway, toggleAway, totalForPlayer, totalForNpc, reset }
 }
 
 function cellKey(npcId: string, playerId: string): string {
   return `${npcId}:${playerId}`
 }
 
+function readRecord<T>(key: string, isValid: (value: unknown) => value is T): T | Record<string, never> {
+  const raw = window.localStorage.getItem(key)
+
+  if (!raw) {
+    return {}
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(raw)
+
+    return isValid(parsed) ? parsed : {}
+  } catch {
+    return {}
+  }
+}
+
 function isAdmirationPoints(value: unknown): value is AdmirationPoints {
-  return typeof value === 'object'
-    && value !== null
-    && Object.values(value).every(entry => typeof entry === 'number')
+  return isRecord(value) && Object.values(value).every(entry => typeof entry === 'number')
+}
+
+function isAwayNpcs(value: unknown): value is AwayNpcs {
+  return isRecord(value) && Object.values(value).every(entry => typeof entry === 'boolean')
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }

@@ -9,15 +9,17 @@ const columns = computed(() => Math.max(1, Math.ceil(Math.sqrt(presentNpcs.value
 const rows = computed(() => Math.max(1, Math.ceil(presentNpcs.value.length / columns.value)))
 
 useHead({
-  title: 'NPC Display'
+  title: 'NPC Display',
+  htmlAttrs: { style: 'overflow: hidden' },
+  bodyAttrs: { style: 'overflow: hidden; margin: 0' }
 })
 </script>
 
 <template>
-  <div class="fixed inset-0 bg-black">
+  <div class="fixed inset-0 overflow-hidden bg-black">
     <div
       v-if="presentNpcs.length"
-      class="grid h-full w-full"
+      class="grid h-full w-full overflow-hidden"
       :style="{
         gridTemplateColumns: `repeat(${columns}, 1fr)`,
         gridTemplateRows: `repeat(${rows}, 1fr)`
@@ -28,7 +30,7 @@ useHead({
         :key="npc.id"
         :src="npc.image"
         :alt="npc.name"
-        class="h-full w-full object-cover"
+        class="block h-full w-full min-h-0 min-w-0 object-cover"
       >
     </div>
 

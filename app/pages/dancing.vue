@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { danceEvents } from '~/data/danceEvents'
 import { dances } from '~/data/dances'
 import { npcs } from '~/data/npcs'
 import { players } from '~/data/players'
@@ -7,17 +8,19 @@ import { AWAY_SLOT, COUPLE_SLOTS, DANCING_ROUNDS, NOT_DANCING_SLOT, useDancingRo
 const { hydrated, participantsInSlot, assign } = useDancingRounds()
 
 const participants = computed(() => [
-  ...players.map(player => ({ id: player.id, name: player.name, gender: player.gender })),
+  ...players.map(player => ({ id: player.id, name: player.name, gender: player.gender, isPlayer: true })),
   ...npcs
     .filter(npc => npc.id !== 'dizzy-the-dragon')
-    .map(npc => ({ id: npc.id, name: npc.name.split(' ')[0], gender: npc.gender }))
+    .map(npc => ({ id: npc.id, name: npc.name.split(' ')[0], gender: npc.gender, isPlayer: false }))
 ])
 
 const participantIds = computed(() => participants.value.map(participant => participant.id))
 
 const rounds = Array.from({ length: DANCING_ROUNDS }, (_, index) => index + 1)
+const TABLE_COLUMNS = 3 + COUPLE_SLOTS.length
 
 const CHIP_BASE = 'cursor-grab select-none whitespace-nowrap rounded-full px-2 py-1 text-xs active:cursor-grabbing'
+const PLAYER_CHIP_CLASS = 'bg-green-100 text-green-900 dark:bg-green-950/40 dark:text-green-200'
 const GENDER_CHIP_CLASS = {
   female: 'bg-rose-100 text-rose-900 dark:bg-rose-950/40 dark:text-rose-200',
   male: 'bg-sky-100 text-sky-900 dark:bg-sky-950/40 dark:text-sky-200'
@@ -28,13 +31,22 @@ function nameFor(participantId: string): string {
 }
 
 function chipClass(participantId: string): string {
-  const gender = participants.value.find(participant => participant.id === participantId)?.gender ?? 'male'
+  const participant = participants.value.find(candidate => candidate.id === participantId)
+  const colorClass = participant?.isPlayer ? PLAYER_CHIP_CLASS : GENDER_CHIP_CLASS[participant?.gender ?? 'male']
 
-  return `${CHIP_BASE} ${GENDER_CHIP_CLASS[gender]}`
+  return `${CHIP_BASE} ${colorClass}`
 }
 
 function danceFor(round: number) {
   return dances.find(dance => dance.round === round)
+}
+
+function eventsAfter(round: number) {
+  return danceEvents.find(block => block.afterRound === round)
+}
+
+function pairClass(afterRound: number): string {
+  return afterRound % 2 === 1 ? 'bg-elevated/40' : ''
 }
 
 function slotLabel(slotId: string): string {
@@ -128,86 +140,106 @@ function onDrop(event: DragEvent, round: number, slotId: string): void {
         </thead>
 
         <tbody>
-          <tr
+          <DanceEventRow
+            v-if="eventsAfter(0)"
+            :events="eventsAfter(0)!.events"
+            :summary="eventsAfter(0)!.summary"
+            :colspan="TABLE_COLUMNS"
+            :bg-class="pairClass(0)"
+          />
+
+          <template
             v-for="round in rounds"
             :key="round"
-            class="border-b border-default last:border-b-0"
           >
-            <td class="px-4 py-2 align-top">
-              <div class="font-medium text-highlighted">
-                {{ round }}. {{ danceFor(round)?.name }}
-              </div>
-              <a
-                v-if="danceFor(round)"
-                :href="danceFor(round)?.spotifyUrl"
-                target="_blank"
-                rel="noopener"
-                class="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline"
+            <tr
+              class="border-b border-default last:border-b-0"
+              :class="pairClass(round - 1)"
+            >
+              <td class="px-4 py-2 align-top">
+                <div class="font-medium text-highlighted">
+                  {{ round }}. {{ danceFor(round)?.name }}
+                </div>
+                <a
+                  v-if="danceFor(round)"
+                  :href="danceFor(round)?.spotifyUrl"
+                  target="_blank"
+                  rel="noopener"
+                  class="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                >
+                  <UIcon
+                    name="i-simple-icons-spotify"
+                    class="size-3.5"
+                  />
+                  Spotify
+                </a>
+              </td>
+
+              <td
+                class="min-h-16 px-2 py-2 align-top"
+                @dragover.prevent
+                @drop="onDrop($event, round, NOT_DANCING_SLOT)"
               >
-                <UIcon
-                  name="i-simple-icons-spotify"
-                  class="size-3.5"
-                />
-                Spotify
-              </a>
-            </td>
-
-            <td
-              class="min-h-16 px-2 py-2 align-top"
-              @dragover.prevent
-              @drop="onDrop($event, round, NOT_DANCING_SLOT)"
-            >
-              <div class="flex flex-wrap gap-1">
-                <div
-                  v-for="participantId in participantsInSlot(round, NOT_DANCING_SLOT, participantIds)"
-                  :key="participantId"
-                  draggable="true"
-                  :class="chipClass(participantId)"
-                  @dragstart="onDragStart($event, round, participantId)"
-                >
-                  {{ nameFor(participantId) }}
+                <div class="flex flex-wrap gap-1">
+                  <div
+                    v-for="participantId in participantsInSlot(round, NOT_DANCING_SLOT, participantIds)"
+                    :key="participantId"
+                    draggable="true"
+                    :class="chipClass(participantId)"
+                    @dragstart="onDragStart($event, round, participantId)"
+                  >
+                    {{ nameFor(participantId) }}
+                  </div>
                 </div>
-              </div>
-            </td>
+              </td>
 
-            <td
-              v-for="slotId in COUPLE_SLOTS"
-              :key="slotId"
-              class="min-h-16 min-w-0 px-2 py-2 align-top"
-              @dragover.prevent
-              @drop="onDrop($event, round, slotId)"
-            >
-              <div class="flex min-h-8 flex-wrap gap-1 rounded-md ring-1 ring-dashed ring-default p-1">
-                <div
-                  v-for="participantId in participantsInSlot(round, slotId, participantIds)"
-                  :key="participantId"
-                  draggable="true"
-                  :class="chipClass(participantId)"
-                  @dragstart="onDragStart($event, round, participantId)"
-                >
-                  {{ nameFor(participantId) }}
+              <td
+                v-for="slotId in COUPLE_SLOTS"
+                :key="slotId"
+                class="min-h-16 min-w-0 px-2 py-2 align-top"
+                @dragover.prevent
+                @drop="onDrop($event, round, slotId)"
+              >
+                <div class="flex min-h-8 flex-wrap gap-1 rounded-md ring-1 ring-dashed ring-default p-1">
+                  <div
+                    v-for="participantId in participantsInSlot(round, slotId, participantIds)"
+                    :key="participantId"
+                    draggable="true"
+                    :class="chipClass(participantId)"
+                    @dragstart="onDragStart($event, round, participantId)"
+                  >
+                    {{ nameFor(participantId) }}
+                  </div>
                 </div>
-              </div>
-            </td>
+              </td>
 
-            <td
-              class="min-h-16 px-2 py-2 align-top"
-              @dragover.prevent
-              @drop="onDrop($event, round, AWAY_SLOT)"
-            >
-              <div class="flex flex-wrap gap-1">
-                <div
-                  v-for="participantId in participantsInSlot(round, AWAY_SLOT, participantIds)"
-                  :key="participantId"
-                  draggable="true"
-                  :class="[chipClass(participantId), 'opacity-60']"
-                  @dragstart="onDragStart($event, round, participantId)"
-                >
-                  {{ nameFor(participantId) }}
+              <td
+                class="min-h-16 px-2 py-2 align-top"
+                @dragover.prevent
+                @drop="onDrop($event, round, AWAY_SLOT)"
+              >
+                <div class="flex flex-wrap gap-1">
+                  <div
+                    v-for="participantId in participantsInSlot(round, AWAY_SLOT, participantIds)"
+                    :key="participantId"
+                    draggable="true"
+                    :class="[chipClass(participantId), 'opacity-60']"
+                    @dragstart="onDragStart($event, round, participantId)"
+                  >
+                    {{ nameFor(participantId) }}
+                  </div>
                 </div>
-              </div>
-            </td>
-          </tr>
+              </td>
+            </tr>
+
+            <DanceEventRow
+              v-if="eventsAfter(round)"
+              :events="eventsAfter(round)!.events"
+              :summary="eventsAfter(round)!.summary"
+              :colspan="TABLE_COLUMNS"
+              :bg-class="pairClass(round)"
+            />
+          </template>
         </tbody>
       </table>
     </div>

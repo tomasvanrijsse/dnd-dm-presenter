@@ -10,13 +10,10 @@ const {
   toggleAway,
   allAway,
   toggleAwayForAll,
-  totalForPlayer,
-  totalForNpc,
   reset
 } = useAdmirationGrid()
 
 const npcIds = npcs.map(npc => npc.id)
-const playerIds = players.map(player => player.id)
 
 const everyoneAway = computed(() => hydrated.value && allAway(npcIds))
 
@@ -75,7 +72,16 @@ function pointsClass(value: number): string {
     </div>
 
     <div class="overflow-x-auto rounded-lg ring ring-default bg-default">
-      <table class="w-full border-collapse text-sm">
+      <table class="w-full table-fixed border-collapse text-sm">
+        <colgroup>
+          <col class="w-[26rem]">
+          <col
+            v-for="player in players"
+            :key="player.id"
+            class="w-40"
+          >
+        </colgroup>
+
         <thead>
           <tr class="border-b border-default bg-elevated/50">
             <th class="sticky left-0 z-10 bg-elevated px-4 py-3 text-left font-semibold text-highlighted">
@@ -84,12 +90,9 @@ function pointsClass(value: number): string {
             <th
               v-for="player in players"
               :key="player.id"
-              class="px-4 py-3 text-center font-semibold text-highlighted min-w-32"
+              class="px-4 py-3 text-center font-semibold text-highlighted"
             >
               {{ player.name }}
-            </th>
-            <th class="px-4 py-3 text-center font-semibold text-muted min-w-20">
-              Total
             </th>
           </tr>
         </thead>
@@ -107,10 +110,11 @@ function pointsClass(value: number): string {
                   :src="npc.image"
                   :alt="npc.name"
                   size="lg"
+                  class="shrink-0"
                   :class="hydrated && isAway(npc.id) ? 'grayscale opacity-50' : ''"
                 />
                 <span
-                  class="whitespace-nowrap"
+                  class="truncate"
                   :class="hydrated && isAway(npc.id) ? 'text-dimmed line-through' : 'text-highlighted'"
                 >
                   {{ npc.name }}
@@ -121,16 +125,17 @@ function pointsClass(value: number): string {
                   color="neutral"
                   variant="subtle"
                   size="sm"
+                  class="shrink-0"
                 >
                   Away
                 </UBadge>
 
                 <UButton
+                  class="ml-auto shrink-0"
                   :icon="hydrated && isAway(npc.id) ? 'i-lucide-user-check' : 'i-lucide-user-x'"
                   color="neutral"
                   variant="ghost"
                   size="xs"
-                  class="ml-auto"
                   :aria-label="hydrated && isAway(npc.id) ? `Bring ${npc.name} back` : `Send ${npc.name} away`"
                   @click="toggleAway(npc.id)"
                 />
@@ -144,11 +149,11 @@ function pointsClass(value: number): string {
             >
               <div class="flex items-center justify-center gap-1">
                 <UButton
-                  v-if="!hydrated || !isAway(npc.id)"
                   icon="i-lucide-minus"
                   color="neutral"
                   variant="ghost"
                   size="xs"
+                  :class="hydrated && isAway(npc.id) ? 'invisible' : ''"
                   :aria-label="`Lower ${npc.name} admiration for ${player.name}`"
                   @click="adjust(npc.id, player.id, -1)"
                 />
@@ -159,39 +164,18 @@ function pointsClass(value: number): string {
                   {{ hydrated ? pointsFor(npc.id, player.id) : '–' }}
                 </span>
                 <UButton
-                  v-if="!hydrated || !isAway(npc.id)"
                   icon="i-lucide-plus"
                   color="neutral"
                   variant="ghost"
                   size="xs"
+                  :class="hydrated && isAway(npc.id) ? 'invisible' : ''"
                   :aria-label="`Raise ${npc.name} admiration for ${player.name}`"
                   @click="adjust(npc.id, player.id, 1)"
                 />
               </div>
             </td>
-
-            <td class="px-4 py-2 text-center font-semibold tabular-nums text-muted">
-              {{ hydrated ? totalForNpc(npc.id, playerIds) : '–' }}
-            </td>
           </tr>
         </tbody>
-
-        <tfoot>
-          <tr class="border-t border-default bg-elevated/50">
-            <th class="sticky left-0 z-10 bg-elevated px-4 py-3 text-left font-semibold text-highlighted">
-              Total
-            </th>
-            <td
-              v-for="player in players"
-              :key="player.id"
-              class="px-4 py-3 text-center text-base font-bold tabular-nums"
-              :class="pointsClass(totalForPlayer(player.id, npcIds))"
-            >
-              {{ hydrated ? totalForPlayer(player.id, npcIds) : '–' }}
-            </td>
-            <td />
-          </tr>
-        </tfoot>
       </table>
     </div>
 

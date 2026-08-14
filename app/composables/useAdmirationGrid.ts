@@ -42,14 +42,6 @@ export function useAdmirationGrid() {
     persistAway()
   }
 
-  function totalForPlayer(playerId: string, npcIds: string[]): number {
-    return npcIds.reduce((total, npcId) => total + pointsFor(npcId, playerId), 0)
-  }
-
-  function totalForNpc(npcId: string, playerIds: string[]): number {
-    return playerIds.reduce((total, playerId) => total + pointsFor(npcId, playerId), 0)
-  }
-
   function reset(): void {
     points.value = {}
     persistPoints()
@@ -104,8 +96,6 @@ export function useAdmirationGrid() {
     toggleAway,
     allAway,
     toggleAwayForAll,
-    totalForPlayer,
-    totalForNpc,
     reset
   }
 }

@@ -1,76 +1,169 @@
+<script setup lang="ts">
+import { npcs } from '~/data/npcs'
+import { players } from '~/data/players'
+
+const { hydrated, pointsFor, adjust, totalForPlayer, totalForNpc, reset } = useAdmirationGrid()
+
+const npcIds = npcs.map(npc => npc.id)
+const playerIds = players.map(player => player.id)
+
+const resetOpen = ref(false)
+
+function confirmReset() {
+  reset()
+  resetOpen.value = false
+}
+
+function pointsClass(value: number): string {
+  if (value > 0) {
+    return 'text-primary'
+  }
+
+  if (value < 0) {
+    return 'text-error'
+  }
+
+  return 'text-dimmed'
+}
+</script>
+
 <template>
-  <div>
-    <UPageHero
-      title="Nuxt Starter Template"
-      description="A production-ready starter template powered by Nuxt UI. Build beautiful, accessible, and performant applications in minutes, not hours."
-      :links="[{
-        label: 'Get started',
-        to: 'https://ui.nuxt.com/docs/getting-started/installation/nuxt',
-        target: '_blank',
-        trailingIcon: 'i-lucide-arrow-right',
-        size: 'xl'
-      }, {
-        label: 'Use this template',
-        to: 'https://github.com/nuxt-ui-templates/starter',
-        target: '_blank',
-        icon: 'i-simple-icons-github',
-        size: 'xl',
-        color: 'neutral',
-        variant: 'subtle'
-      }]"
-    />
+  <UContainer class="py-8">
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-highlighted">
+          Admiration Matrix
+        </h1>
+        <p class="text-sm text-muted">
+          Admiration points each NPC holds for each player. Saved in this browser, synced across windows.
+        </p>
+      </div>
 
-    <UPageSection
-      id="features"
-      title="Everything you need to build modern Nuxt apps"
-      description="Start with a solid foundation. This template includes all the essentials for building production-ready applications with Nuxt UI's powerful component system."
-      :features="[{
-        icon: 'i-lucide-rocket',
-        title: 'Production-ready from day one',
-        description: 'Pre-configured with TypeScript, ESLint, Tailwind CSS, and all the best practices. Focus on building features, not setting up tooling.'
-      }, {
-        icon: 'i-lucide-palette',
-        title: 'Beautiful by default',
-        description: 'Leveraging Nuxt UI\'s design system with automatic dark mode, consistent spacing, and polished components that look great out of the box.'
-      }, {
-        icon: 'i-lucide-zap',
-        title: 'Lightning fast',
-        description: 'Optimized for performance with SSR/SSG support, automatic code splitting, and edge-ready deployment. Your users will love the speed.'
-      }, {
-        icon: 'i-lucide-blocks',
-        title: '100+ components included',
-        description: 'Access Nuxt UI\'s comprehensive component library. From forms to navigation, everything is accessible, responsive, and customizable.'
-      }, {
-        icon: 'i-lucide-code-2',
-        title: 'Developer experience first',
-        description: 'Auto-imports, hot module replacement, and TypeScript support. Write less boilerplate and ship more features.'
-      }, {
-        icon: 'i-lucide-shield-check',
-        title: 'Built for scale',
-        description: 'Enterprise-ready architecture with proper error handling, SEO optimization, and security best practices built-in.'
-      }]"
-    />
-
-    <UPageSection>
-      <UPageCTA
-        title="Ready to build your next Nuxt app?"
-        description="Join thousands of developers building with Nuxt and Nuxt UI. Get this template and start shipping today."
+      <UButton
+        color="neutral"
         variant="subtle"
-        :links="[{
-          label: 'Start building',
-          to: 'https://ui.nuxt.com/docs/getting-started/installation/nuxt',
-          target: '_blank',
-          trailingIcon: 'i-lucide-arrow-right',
-          color: 'neutral'
-        }, {
-          label: 'View on GitHub',
-          to: 'https://github.com/nuxt-ui-templates/starter',
-          target: '_blank',
-          icon: 'i-simple-icons-github',
-          color: 'neutral',
-          variant: 'outline'
-        }]"
-      />
-    </UPageSection>
-  </div>
+        icon="i-lucide-rotate-ccw"
+        @click="resetOpen = true"
+      >
+        Reset all
+      </UButton>
+    </div>
+
+    <div class="overflow-x-auto rounded-lg ring ring-default bg-default">
+      <table class="w-full border-collapse text-sm">
+        <thead>
+          <tr class="border-b border-default bg-elevated/50">
+            <th class="sticky left-0 z-10 bg-elevated px-4 py-3 text-left font-semibold text-highlighted">
+              NPC
+            </th>
+            <th
+              v-for="player in players"
+              :key="player.id"
+              class="px-4 py-3 text-center font-semibold text-highlighted min-w-32"
+            >
+              {{ player.name }}
+            </th>
+            <th class="px-4 py-3 text-center font-semibold text-muted min-w-20">
+              Total
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr
+            v-for="npc in npcs"
+            :key="npc.id"
+            class="border-b border-default last:border-b-0 hover:bg-elevated/30"
+          >
+            <th class="sticky left-0 z-10 bg-default px-4 py-2 text-left font-medium">
+              <div class="flex items-center gap-3">
+                <UAvatar
+                  :src="npc.image"
+                  :alt="npc.name"
+                  size="lg"
+                />
+                <span class="text-highlighted whitespace-nowrap">{{ npc.name }}</span>
+              </div>
+            </th>
+
+            <td
+              v-for="player in players"
+              :key="player.id"
+              class="px-2 py-2 text-center"
+            >
+              <div class="flex items-center justify-center gap-1">
+                <UButton
+                  icon="i-lucide-minus"
+                  color="neutral"
+                  variant="ghost"
+                  size="xs"
+                  :aria-label="`Lower ${npc.name} admiration for ${player.name}`"
+                  @click="adjust(npc.id, player.id, -1)"
+                />
+                <span
+                  class="w-8 text-base font-semibold tabular-nums"
+                  :class="pointsClass(pointsFor(npc.id, player.id))"
+                >
+                  {{ hydrated ? pointsFor(npc.id, player.id) : '–' }}
+                </span>
+                <UButton
+                  icon="i-lucide-plus"
+                  color="neutral"
+                  variant="ghost"
+                  size="xs"
+                  :aria-label="`Raise ${npc.name} admiration for ${player.name}`"
+                  @click="adjust(npc.id, player.id, 1)"
+                />
+              </div>
+            </td>
+
+            <td class="px-4 py-2 text-center font-semibold tabular-nums text-muted">
+              {{ hydrated ? totalForNpc(npc.id, playerIds) : '–' }}
+            </td>
+          </tr>
+        </tbody>
+
+        <tfoot>
+          <tr class="border-t border-default bg-elevated/50">
+            <th class="sticky left-0 z-10 bg-elevated px-4 py-3 text-left font-semibold text-highlighted">
+              Total
+            </th>
+            <td
+              v-for="player in players"
+              :key="player.id"
+              class="px-4 py-3 text-center text-base font-bold tabular-nums"
+              :class="pointsClass(totalForPlayer(player.id, npcIds))"
+            >
+              {{ hydrated ? totalForPlayer(player.id, npcIds) : '–' }}
+            </td>
+            <td />
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <UModal
+      v-model:open="resetOpen"
+      title="Reset all admiration points?"
+      description="Every cell goes back to 0. This cannot be undone."
+    >
+      <template #footer>
+        <div class="flex justify-end gap-2 w-full">
+          <UButton
+            color="neutral"
+            variant="ghost"
+            @click="resetOpen = false"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            color="error"
+            @click="confirmReset"
+          >
+            Reset
+          </UButton>
+        </div>
+      </template>
+    </UModal>
+  </UContainer>
 </template>

@@ -1,35 +1,25 @@
-# Nuxt Starter Template
+# DnD Wedding
 
-[![Nuxt UI](https://img.shields.io/badge/Made%20with-Nuxt%20UI-00DC82?logo=nuxt&labelColor=020420)](https://ui.nuxt.com)
+Session tools for a DnD one shot, built with [Nuxt UI](https://ui.nuxt.com).
 
-Use this template to get started with [Nuxt UI](https://ui.nuxt.com) quickly.
+## Admiration Matrix
 
-- [Live demo](https://starter-template.nuxt.dev/)
-- [Documentation](https://ui.nuxt.com/docs/getting-started/installation/nuxt)
+The home page (`/`) is a grid of the 11 NPCs (rows) against the 3 players (columns). Each cell tracks how many
+admiration points that NPC holds for that player. Points can go negative.
 
-<a href="https://starter-template.nuxt.dev/" target="_blank">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://ui.nuxt.com/assets/templates/nuxt/starter-dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="https://ui.nuxt.com/assets/templates/nuxt/starter-light.png">
-    <img alt="Nuxt Starter Template" src="https://ui.nuxt.com/assets/templates/nuxt/starter-light.png" width="830" height="466">
-  </picture>
-</a>
+- `-` / `+` adjust a cell by 1.
+- The right column totals a single NPC's admiration across all players.
+- The bottom row totals a single player's admiration across all NPCs.
+- **Reset all** clears every cell.
 
-> The starter template for Vue is on https://github.com/nuxt-ui-templates/starter-vue.
+State lives in `localStorage` under `dnd-wedding:admiration-points`, so it survives a reload and stays in sync between
+browser windows on the same machine. It is not shared across machines or browsers.
 
-## Quick Start
-
-```bash [Terminal]
-npm create nuxt@latest -- -t ui
-```
-
-## Deploy your own
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-name=starter&repository-url=https%3A%2F%2Fgithub.com%2Fnuxt-ui-templates%2Fstarter&demo-image=https%3A%2F%2Fui.nuxt.com%2Fassets%2Ftemplates%2Fnuxt%2Fstarter-dark.png&demo-url=https%3A%2F%2Fstarter-template.nuxt.dev%2F&demo-title=Nuxt%20Starter%20Template&demo-description=A%20minimal%20template%20to%20get%20started%20with%20Nuxt%20UI.)
+To change the cast, edit `app/data/npcs.ts` (images live in `public/NPCs`) and `app/data/players.ts`.
 
 ## Setup
 
-Make sure to install the dependencies:
+Install dependencies:
 
 ```bash
 pnpm install
@@ -41,6 +31,13 @@ Start the development server on `http://localhost:3000`:
 
 ```bash
 pnpm dev
+```
+
+## Checks
+
+```bash
+pnpm lint
+pnpm typecheck
 ```
 
 ## Production

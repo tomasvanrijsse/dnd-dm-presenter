@@ -21,7 +21,7 @@ useHead({
 </script>
 
 <template>
-  <div class="fixed inset-0 overflow-hidden bg-white">
+  <div class="fixed inset-0 overflow-hidden bg-white mb-8">
     <div
       v-if="presentNpcs.length"
       class="grid h-full w-full overflow-hidden"

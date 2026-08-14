@@ -28,7 +28,18 @@ export function useAdmirationGrid() {
 
   function toggleAway(npcId: string): void {
     away.value = { ...away.value, [npcId]: !isAway(npcId) }
-    window.localStorage.setItem(AWAY_KEY, JSON.stringify(away.value))
+    persistAway()
+  }
+
+  function allAway(npcIds: string[]): boolean {
+    return npcIds.length > 0 && npcIds.every(isAway)
+  }
+
+  function toggleAwayForAll(npcIds: string[]): void {
+    const goAway = !allAway(npcIds)
+
+    away.value = { ...away.value, ...Object.fromEntries(npcIds.map(npcId => [npcId, goAway])) }
+    persistAway()
   }
 
   function totalForPlayer(playerId: string, npcIds: string[]): number {
@@ -78,7 +89,25 @@ export function useAdmirationGrid() {
     window.localStorage.setItem(POINTS_KEY, JSON.stringify(points.value))
   }
 
-  return { points, away, hydrated, pointsFor, adjust, setPoints, isAway, toggleAway, totalForPlayer, totalForNpc, reset }
+  function persistAway(): void {
+    window.localStorage.setItem(AWAY_KEY, JSON.stringify(away.value))
+  }
+
+  return {
+    points,
+    away,
+    hydrated,
+    pointsFor,
+    adjust,
+    setPoints,
+    isAway,
+    toggleAway,
+    allAway,
+    toggleAwayForAll,
+    totalForPlayer,
+    totalForNpc,
+    reset
+  }
 }
 
 function cellKey(npcId: string, playerId: string): string {

@@ -2,10 +2,23 @@
 import { npcs } from '~/data/npcs'
 import { players } from '~/data/players'
 
-const { hydrated, pointsFor, adjust, isAway, toggleAway, totalForPlayer, totalForNpc, reset } = useAdmirationGrid()
+const {
+  hydrated,
+  pointsFor,
+  adjust,
+  isAway,
+  toggleAway,
+  allAway,
+  toggleAwayForAll,
+  totalForPlayer,
+  totalForNpc,
+  reset
+} = useAdmirationGrid()
 
 const npcIds = npcs.map(npc => npc.id)
 const playerIds = players.map(player => player.id)
+
+const everyoneAway = computed(() => hydrated.value && allAway(npcIds))
 
 const resetOpen = ref(false)
 
@@ -40,14 +53,25 @@ function pointsClass(value: number): string {
         </p>
       </div>
 
-      <UButton
-        color="neutral"
-        variant="subtle"
-        icon="i-lucide-rotate-ccw"
-        @click="resetOpen = true"
-      >
-        Reset all
-      </UButton>
+      <div class="flex items-center gap-2">
+        <UButton
+          color="neutral"
+          variant="subtle"
+          :icon="everyoneAway ? 'i-lucide-user-check' : 'i-lucide-user-x'"
+          @click="toggleAwayForAll(npcIds)"
+        >
+          {{ everyoneAway ? 'Bring everyone back' : 'Send everyone away' }}
+        </UButton>
+
+        <UButton
+          color="neutral"
+          variant="subtle"
+          icon="i-lucide-rotate-ccw"
+          @click="resetOpen = true"
+        >
+          Reset all
+        </UButton>
+      </div>
     </div>
 
     <div class="overflow-x-auto rounded-lg ring ring-default bg-default">

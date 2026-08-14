@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Npc } from '~/data/npcs'
 import { npcs } from '~/data/npcs'
 import { players } from '~/data/players'
 
@@ -25,6 +26,8 @@ function confirmReset() {
   reset()
   resetOpen.value = false
 }
+
+const infoNpc = ref<Npc | null>(null)
 
 function pointsClass(value: number): string {
   if (value > 0) {
@@ -118,19 +121,26 @@ function pointsClass(value: number): string {
           >
             <th class="sticky left-0 z-10 bg-default px-4 py-2 text-left font-medium">
               <div class="flex items-center gap-3">
-                <UAvatar
-                  :src="npc.image"
-                  :alt="npc.name"
-                  size="lg"
-                  class="shrink-0"
-                  :class="hydrated && isAway(npc.id) ? 'grayscale opacity-50' : ''"
-                />
-                <span
-                  class="truncate"
-                  :class="hydrated && isAway(npc.id) ? 'text-dimmed line-through' : 'text-highlighted'"
+                <button
+                  type="button"
+                  class="flex min-w-0 items-center gap-3 rounded hover:opacity-75"
+                  :aria-label="`View info for ${npc.name}`"
+                  @click="infoNpc = npc"
                 >
-                  {{ npc.name }}
-                </span>
+                  <UAvatar
+                    :src="npc.image"
+                    :alt="npc.name"
+                    size="lg"
+                    class="shrink-0"
+                    :class="hydrated && isAway(npc.id) ? 'grayscale opacity-50' : ''"
+                  />
+                  <span
+                    class="truncate"
+                    :class="hydrated && isAway(npc.id) ? 'text-dimmed line-through' : 'text-highlighted'"
+                  >
+                    {{ npc.name }}
+                  </span>
+                </button>
 
                 <UBadge
                   v-if="hydrated && isAway(npc.id)"
@@ -220,6 +230,56 @@ function pointsClass(value: number): string {
           >
             Reset
           </UButton>
+        </div>
+      </template>
+    </UModal>
+
+    <UModal
+      :open="infoNpc !== null"
+      :title="infoNpc?.name"
+      :description="infoNpc?.info.role"
+      :ui="{ content: 'sm:max-w-2xl' }"
+      @update:open="value => { if (!value) infoNpc = null }"
+    >
+      <template #body>
+        <div
+          v-if="infoNpc"
+          class="flex flex-col gap-4"
+        >
+          <div class="flex items-start gap-4">
+            <UAvatar
+              :src="infoNpc.image"
+              :alt="infoNpc.name"
+              size="3xl"
+              class="shrink-0"
+            />
+            <p class="text-sm text-muted">
+              {{ infoNpc.info.appearance }}
+            </p>
+          </div>
+
+          <p class="text-sm text-muted">
+            <span class="font-semibold text-highlighted">Gear:</span> {{ infoNpc.info.gear }}
+          </p>
+
+          <div class="grid grid-cols-1 gap-2 rounded-lg bg-elevated/50 p-3 text-sm sm:grid-cols-2">
+            <p><span class="font-semibold text-highlighted">Trait:</span> {{ infoNpc.info.trait }}</p>
+            <p><span class="font-semibold text-highlighted">Ideal:</span> {{ infoNpc.info.ideal }}</p>
+            <p><span class="font-semibold text-highlighted">Bond:</span> {{ infoNpc.info.bond }}</p>
+            <p><span class="font-semibold text-highlighted">Flaw:</span> {{ infoNpc.info.flaw }}</p>
+          </div>
+
+          <div
+            v-for="section in infoNpc.info.sections"
+            :key="section.title"
+          >
+            <h3 class="mb-1 font-semibold text-highlighted">
+              {{ section.title }}
+            </h3>
+            <p class="text-sm text-muted">
+              {{ section.body }}
+            </p>
+          </div>
         </div>
       </template>
     </UModal>

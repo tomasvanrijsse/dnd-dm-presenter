@@ -20,6 +20,14 @@ reload and stays in sync between browser windows on the same machine. It is not 
 
 To change the cast, edit `app/data/npcs.ts` (images live in `public/NPCs`) and `app/data/players.ts`.
 
+## Display
+
+**Open display** opens `/present` in a new tab — a full-screen, black-background grid of the portraits of every NPC
+that is currently *not* away. One NPC fills the whole screen; more NPCs tile side by side, growing into more rows as
+the count goes up. It has no controls: put it on a second screen or projector for the players and drive the away
+status from `/` on your own screen. Since both pages read the same `localStorage` state, sending an NPC away or back
+on `/` updates the display live, even across windows.
+
 ## Setup
 
 Install dependencies:

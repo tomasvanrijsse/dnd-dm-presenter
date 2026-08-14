@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dances } from '~/data/dances'
 import { npcs } from '~/data/npcs'
 import { players } from '~/data/players'
 import { AWAY_SLOT, COUPLE_SLOTS, DANCING_ROUNDS, NOT_DANCING_SLOT, useDancingRounds } from '~/composables/useDancingRounds'
@@ -16,6 +17,10 @@ const rounds = Array.from({ length: DANCING_ROUNDS }, (_, index) => index + 1)
 
 function nameFor(participantId: string): string {
   return participants.value.find(participant => participant.id === participantId)?.name ?? participantId
+}
+
+function danceFor(round: number) {
+  return dances.find(dance => dance.round === round)
 }
 
 function slotLabel(slotId: string): string {
@@ -77,8 +82,8 @@ function onDrop(event: DragEvent, round: number, slotId: string): void {
     >
       <table class="w-full table-fixed border-collapse text-sm">
         <colgroup>
-          <col class="w-[6%]">
-          <col class="w-[20%]">
+          <col class="w-[14%]">
+          <col class="w-[16%]">
           <col
             v-for="slotId in COUPLE_SLOTS"
             :key="slotId"
@@ -114,8 +119,23 @@ function onDrop(event: DragEvent, round: number, slotId: string): void {
             :key="round"
             class="border-b border-default last:border-b-0"
           >
-            <td class="px-4 py-2 align-top font-medium text-highlighted">
-              {{ round }}
+            <td class="px-4 py-2 align-top">
+              <div class="font-medium text-highlighted">
+                {{ round }}. {{ danceFor(round)?.name }}
+              </div>
+              <a
+                v-if="danceFor(round)"
+                :href="danceFor(round)?.spotifyUrl"
+                target="_blank"
+                rel="noopener"
+                class="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline"
+              >
+                <UIcon
+                  name="i-simple-icons-spotify"
+                  class="size-3.5"
+                />
+                Spotify
+              </a>
             </td>
 
             <td

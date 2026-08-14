@@ -10,6 +10,8 @@ const {
   toggleAway,
   allAway,
   toggleAwayForAll,
+  isIntroduced,
+  toggleIntroduced,
   reset
 } = useAdmirationGrid()
 
@@ -140,15 +142,24 @@ function pointsClass(value: number): string {
                   Away
                 </UBadge>
 
-                <UButton
-                  class="ml-auto shrink-0"
-                  :icon="hydrated && isAway(npc.id) ? 'i-lucide-user-check' : 'i-lucide-user-x'"
-                  color="neutral"
-                  variant="ghost"
-                  size="xs"
-                  :aria-label="hydrated && isAway(npc.id) ? `Bring ${npc.name} back` : `Send ${npc.name} away`"
-                  @click="toggleAway(npc.id)"
-                />
+                <div class="ml-auto flex shrink-0 items-center gap-3">
+                  <USwitch
+                    :model-value="hydrated && isIntroduced(npc.id)"
+                    label="Introduced"
+                    size="sm"
+                    :aria-label="`Toggle whether ${npc.name} has been introduced`"
+                    @update:model-value="toggleIntroduced(npc.id)"
+                  />
+
+                  <UButton
+                    :icon="hydrated && isAway(npc.id) ? 'i-lucide-user-check' : 'i-lucide-user-x'"
+                    color="neutral"
+                    variant="ghost"
+                    size="xs"
+                    :aria-label="hydrated && isAway(npc.id) ? `Bring ${npc.name} back` : `Send ${npc.name} away`"
+                    @click="toggleAway(npc.id)"
+                  />
+                </div>
               </div>
             </th>
 

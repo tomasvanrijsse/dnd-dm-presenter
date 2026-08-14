@@ -1,13 +1,16 @@
 const POINTS_KEY = 'dnd-wedding:admiration-points'
 const AWAY_KEY = 'dnd-wedding:away-npcs'
+const INTRODUCED_KEY = 'dnd-wedding:introduced-npcs'
 
 type AdmirationPoints = Record<string, number>
-type AwayNpcs = Record<string, boolean>
+type NpcFlags = Record<string, boolean>
 
 export function useAdmirationGrid() {
   const points = useState<AdmirationPoints>('admiration-points', () => ({}))
-  const away = useState<AwayNpcs>('away-npcs', () => ({}))
   const hydrated = useState<boolean>('admiration-points-hydrated', () => false)
+
+  const away = useBooleanFlags(AWAY_KEY, 'away-npcs')
+  const introduced = useBooleanFlags(INTRODUCED_KEY, 'introduced-npcs')
 
   function pointsFor(npcId: string, playerId: string): number {
     return points.value[cellKey(npcId, playerId)] ?? 0
@@ -22,26 +25,6 @@ export function useAdmirationGrid() {
     persistPoints()
   }
 
-  function isAway(npcId: string): boolean {
-    return away.value[npcId] === true
-  }
-
-  function toggleAway(npcId: string): void {
-    away.value = { ...away.value, [npcId]: !isAway(npcId) }
-    persistAway()
-  }
-
-  function allAway(npcIds: string[]): boolean {
-    return npcIds.length > 0 && npcIds.every(isAway)
-  }
-
-  function toggleAwayForAll(npcIds: string[]): void {
-    const goAway = !allAway(npcIds)
-
-    away.value = { ...away.value, ...Object.fromEntries(npcIds.map(npcId => [npcId, goAway])) }
-    persistAway()
-  }
-
   function reset(): void {
     points.value = {}
     persistPoints()
@@ -49,7 +32,8 @@ export function useAdmirationGrid() {
 
   onMounted(() => {
     points.value = readPoints()
-    away.value = readAway()
+    away.read()
+    introduced.read()
     hydrated.value = true
 
     window.addEventListener('storage', onStorage)
@@ -64,40 +48,74 @@ export function useAdmirationGrid() {
       points.value = readPoints()
     }
 
-    if (event.key === AWAY_KEY) {
-      away.value = readAway()
-    }
+    away.onStorage(event)
+    introduced.onStorage(event)
   }
 
   function readPoints(): AdmirationPoints {
     return readRecord(POINTS_KEY, isAdmirationPoints)
   }
 
-  function readAway(): AwayNpcs {
-    return readRecord(AWAY_KEY, isAwayNpcs)
-  }
-
   function persistPoints(): void {
     window.localStorage.setItem(POINTS_KEY, JSON.stringify(points.value))
   }
 
-  function persistAway(): void {
-    window.localStorage.setItem(AWAY_KEY, JSON.stringify(away.value))
-  }
-
   return {
     points,
-    away,
+    away: away.flags,
+    introduced: introduced.flags,
     hydrated,
     pointsFor,
     adjust,
     setPoints,
-    isAway,
-    toggleAway,
-    allAway,
-    toggleAwayForAll,
+    isAway: away.isSet,
+    toggleAway: away.toggle,
+    allAway: away.allSet,
+    toggleAwayForAll: away.toggleForAll,
+    isIntroduced: introduced.isSet,
+    toggleIntroduced: introduced.toggle,
     reset
   }
+}
+
+function useBooleanFlags(storageKey: string, stateKey: string) {
+  const flags = useState<NpcFlags>(stateKey, () => ({}))
+
+  function isSet(npcId: string): boolean {
+    return flags.value[npcId] === true
+  }
+
+  function toggle(npcId: string): void {
+    flags.value = { ...flags.value, [npcId]: !isSet(npcId) }
+    persist()
+  }
+
+  function allSet(npcIds: string[]): boolean {
+    return npcIds.length > 0 && npcIds.every(isSet)
+  }
+
+  function toggleForAll(npcIds: string[]): void {
+    const value = !allSet(npcIds)
+
+    flags.value = { ...flags.value, ...Object.fromEntries(npcIds.map(npcId => [npcId, value])) }
+    persist()
+  }
+
+  function read(): void {
+    flags.value = readRecord(storageKey, isNpcFlags)
+  }
+
+  function persist(): void {
+    window.localStorage.setItem(storageKey, JSON.stringify(flags.value))
+  }
+
+  function onStorage(event: StorageEvent): void {
+    if (event.key === storageKey) {
+      read()
+    }
+  }
+
+  return { flags, isSet, toggle, allSet, toggleForAll, read, onStorage }
 }
 
 function cellKey(npcId: string, playerId: string): string {
@@ -124,7 +142,7 @@ function isAdmirationPoints(value: unknown): value is AdmirationPoints {
   return isRecord(value) && Object.values(value).every(entry => typeof entry === 'number')
 }
 
-function isAwayNpcs(value: unknown): value is AwayNpcs {
+function isNpcFlags(value: unknown): value is NpcFlags {
   return isRecord(value) && Object.values(value).every(entry => typeof entry === 'boolean')
 }
 

@@ -13,20 +13,25 @@ admiration points that NPC holds for that player. Points can go negative.
   again to bring them back.
 - **Send everyone away** does the same for the whole cast at once. It only flips to **Bring everyone back** when every
   NPC is away, so a mixed table always sends the rest away first.
-- **Reset all** clears every cell. It leaves the away flags alone.
+- The **Introduced** switch marks whether that NPC's name has been revealed to the players yet. It only controls
+  whether the name shows up on the display (see below) — it has no effect on this page.
+- **Reset all** clears every cell. It leaves the away and introduced flags alone.
 
-State lives in `localStorage` under `dnd-wedding:admiration-points` and `dnd-wedding:away-npcs`, so it survives a
-reload and stays in sync between browser windows on the same machine. It is not shared across machines or browsers.
+State lives in `localStorage` under `dnd-wedding:admiration-points`, `dnd-wedding:away-npcs` and
+`dnd-wedding:introduced-npcs`, so it survives a reload and stays in sync between browser windows on the same machine.
+It is not shared across machines or browsers.
 
 To change the cast, edit `app/data/npcs.ts` (images live in `public/NPCs`) and `app/data/players.ts`.
 
 ## Display
 
-**Open display** opens `/present` in a new tab — a full-screen, black-background grid of the portraits of every NPC
+**Open display** opens `/present` in a new tab — a full-screen, white-background grid of the portraits of every NPC
 that is currently *not* away. One NPC fills the whole screen; more NPCs tile side by side, growing into more rows as
-the count goes up. It has no controls: put it on a second screen or projector for the players and drive the away
-status from `/` on your own screen. Since both pages read the same `localStorage` state, sending an NPC away or back
-on `/` updates the display live, even across windows.
+the count goes up. If an NPC has been marked **Introduced** on `/`, their name appears beneath their portrait in the
+[Tangerine](https://fonts.google.com/specimen/Tangerine) Google Font; otherwise only the portrait shows. It has no
+controls: put it on a second screen or projector for the players and drive the away/introduced status from `/` on
+your own screen. Since both pages read the same `localStorage` state, changes on `/` update the display live, even
+across windows.
 
 ## Setup
 

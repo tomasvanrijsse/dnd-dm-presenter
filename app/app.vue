@@ -14,7 +14,7 @@ useHead({
 })
 
 const title = 'DnD Wedding — Admiration Matrix'
-const description = 'Track how many admiration points each NPC holds for each player during the one shot.'
+const description = 'Track how many points each NPC holds for each player during the one shot.'
 
 useSeoMeta({
   title,

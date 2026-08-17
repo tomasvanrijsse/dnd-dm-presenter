@@ -1,13 +1,13 @@
-const POINTS_KEY = 'dnd-wedding:admiration-points'
+const POINTS_KEY = 'dnd-wedding:points'
 const AWAY_KEY = 'dnd-wedding:away-npcs'
 const INTRODUCED_KEY = 'dnd-wedding:introduced-npcs'
 
-type AdmirationPoints = Record<string, number>
+type Points = Record<string, number>
 type NpcFlags = Record<string, boolean>
 
 export function useAdmirationGrid() {
-  const points = useState<AdmirationPoints>('admiration-points', () => ({}))
-  const hydrated = useState<boolean>('admiration-points-hydrated', () => false)
+  const points = useState<Points>('points', () => ({}))
+  const hydrated = useState<boolean>('points-hydrated', () => false)
 
   const away = useBooleanFlags(AWAY_KEY, 'away-npcs')
   const introduced = useBooleanFlags(INTRODUCED_KEY, 'introduced-npcs')
@@ -52,8 +52,8 @@ export function useAdmirationGrid() {
     introduced.onStorage(event)
   }
 
-  function readPoints(): AdmirationPoints {
-    return readRecord(POINTS_KEY, isAdmirationPoints)
+  function readPoints(): Points {
+    return readRecord(POINTS_KEY, isPoints)
   }
 
   function persistPoints(): void {
@@ -138,7 +138,7 @@ function readRecord<T>(key: string, isValid: (value: unknown) => value is T): T 
   }
 }
 
-function isAdmirationPoints(value: unknown): value is AdmirationPoints {
+function isPoints(value: unknown): value is Points {
   return isRecord(value) && Object.values(value).every(entry => typeof entry === 'number')
 }
 

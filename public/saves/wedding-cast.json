@@ -1,0 +1,84 @@
+{
+  "npcs": [
+    {
+      "id": "lysandrea-isillionthe",
+      "name": "Lysandrea Isillionthe",
+      "image": "/NPCs/Lysandrea-Isillionthe.jpg",
+      "description": ""
+    },
+    {
+      "id": "galianne-isillionthe-fitzgilbert",
+      "name": "Galianne Isillionthe Fitzgilbert",
+      "image": "/NPCs/Galianne-Isillionthe-Fitzgilbert.jpg",
+      "description": ""
+    },
+    {
+      "id": "thalgion-isillionthe",
+      "name": "Thalgion Isillionthe",
+      "image": "/NPCs/Thalgion-Isillionthe.jpg",
+      "description": ""
+    },
+    {
+      "id": "roslinda-brynborn",
+      "name": "Roslinda Brynborn",
+      "image": "/NPCs/Roslinda-Brynborn.jpg",
+      "description": ""
+    },
+    {
+      "id": "miriel",
+      "name": "Miriel",
+      "image": "/NPCs/miriel.jpg",
+      "description": ""
+    },
+    {
+      "id": "maximillian-darlington",
+      "name": "Maximillian D'arlington",
+      "image": "/NPCs/Maximillian-D'arlington.jpg",
+      "description": ""
+    },
+    {
+      "id": "sirbastien-darlington",
+      "name": "Sirbastien D'arlington",
+      "image": "/NPCs/Sirbastien-D'arlington.jpg",
+      "description": ""
+    },
+    {
+      "id": "lillian-darlington",
+      "name": "Lillian D'arlington",
+      "image": "/NPCs/Lillian-D'arlington.jpg",
+      "description": ""
+    },
+    {
+      "id": "milton-fiends",
+      "name": "Milton Fiends",
+      "image": "/NPCs/Milton-Fiends.jpg",
+      "description": ""
+    },
+    {
+      "id": "morgen-lavender",
+      "name": "Morgen Lavender",
+      "image": "/NPCs/Morgen-Lavender.jpg",
+      "description": ""
+    },
+    {
+      "id": "dizzy-the-dragon",
+      "name": "Dizzy the Dragon",
+      "image": "/NPCs/Dizzy-the-Dragon.jpg",
+      "description": ""
+    }
+  ],
+  "players": [
+    {
+      "id": "aksel",
+      "name": "Aksel"
+    },
+    {
+      "id": "corhin",
+      "name": "Corhin"
+    },
+    {
+      "id": "izar",
+      "name": "Izar"
+    }
+  ]
+}

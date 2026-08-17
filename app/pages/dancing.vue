@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { danceEvents } from '~/data/danceEvents'
 import { dances } from '~/data/dances'
-import { npcs } from '~/data/npcs'
-import { players } from '~/data/players'
 import { AWAY_SLOT, COUPLE_SLOTS, DANCING_ROUNDS, NOT_DANCING_SLOT, useDancingRounds } from '~/composables/useDancingRounds'
 
-const { hydrated, participantsInSlot, assign } = useDancingRounds()
+const { npcs, hydrated: npcsHydrated } = useNpcs()
+const { players, hydrated: playersHydrated } = usePlayers()
+const { hydrated: assignmentsHydrated, participantsInSlot, assign } = useDancingRounds()
+
+const hydrated = computed(() => npcsHydrated.value && playersHydrated.value && assignmentsHydrated.value)
 
 const participants = computed(() => [
-  ...players.map(player => ({ id: player.id, name: player.name, gender: player.gender, isPlayer: true })),
-  ...npcs
-    .filter(npc => npc.id !== 'dizzy-the-dragon')
-    .map(npc => ({ id: npc.id, name: npc.name.split(' ')[0], gender: npc.gender, isPlayer: false }))
+  ...players.value.map(player => ({ id: player.id, name: player.name, isPlayer: true })),
+  ...npcs.value.map(npc => ({ id: npc.id, name: npc.name.split(' ')[0], isPlayer: false }))
 ])
 
 const participantIds = computed(() => participants.value.map(participant => participant.id))
@@ -21,10 +21,7 @@ const TABLE_COLUMNS = 3 + COUPLE_SLOTS.length
 
 const CHIP_BASE = 'cursor-grab select-none whitespace-nowrap rounded-full px-2 py-1 text-xs active:cursor-grabbing'
 const PLAYER_CHIP_CLASS = 'bg-green-100 text-green-900 dark:bg-green-950/40 dark:text-green-200'
-const GENDER_CHIP_CLASS = {
-  female: 'bg-rose-100 text-rose-900 dark:bg-rose-950/40 dark:text-rose-200',
-  male: 'bg-sky-100 text-sky-900 dark:bg-sky-950/40 dark:text-sky-200'
-}
+const NPC_CHIP_CLASS = 'bg-sky-100 text-sky-900 dark:bg-sky-950/40 dark:text-sky-200'
 
 function nameFor(participantId: string): string {
   return participants.value.find(participant => participant.id === participantId)?.name ?? participantId
@@ -32,7 +29,7 @@ function nameFor(participantId: string): string {
 
 function chipClass(participantId: string): string {
   const participant = participants.value.find(candidate => candidate.id === participantId)
-  const colorClass = participant?.isPlayer ? PLAYER_CHIP_CLASS : GENDER_CHIP_CLASS[participant?.gender ?? 'male']
+  const colorClass = participant?.isPlayer ? PLAYER_CHIP_CLASS : NPC_CHIP_CLASS
 
   return `${CHIP_BASE} ${colorClass}`
 }

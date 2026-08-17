@@ -4,9 +4,11 @@ Session tools for a DnD one shot, built with [Nuxt UI](https://ui.nuxt.com).
 
 ## Admiration Matrix
 
-The home page (`/`) is a grid of the 11 NPCs (rows) against the 3 players (columns). Each cell tracks how many
-admiration points that NPC holds for that player. Points can go negative.
+The home page (`/`) is a grid of the NPCs (rows) against the players (columns). Each cell tracks how many points
+that NPC holds for that player. Points can go negative.
 
+- **Add NPC** opens a form to create an NPC (name, image path, rich-text description). Clicking an NPC's name or
+  avatar opens a view of their description with **Edit** and **Delete** buttons.
 - `-` / `+` adjust a cell by 1.
 - The user icon at the end of an NPC row sends that NPC away: the row is greyed out and its `-` / `+` buttons
   disappear, so their points cannot be changed while they are off screen. Existing points stay visible. Click the icon
@@ -17,11 +19,16 @@ admiration points that NPC holds for that player. Points can go negative.
   whether the name shows up on the display (see below) — it has no effect on this page.
 - **Reset all** clears every cell. It leaves the away and introduced flags alone.
 
-State lives in `localStorage` under `dnd-wedding:admiration-points`, `dnd-wedding:away-npcs` and
+State lives in `localStorage` under `dnd-wedding:points`, `dnd-wedding:away-npcs` and
 `dnd-wedding:introduced-npcs`, so it survives a reload and stays in sync between browser windows on the same machine.
 It is not shared across machines or browsers.
 
-To change the cast, edit `app/data/npcs.ts` (images live in `public/NPCs`) and `app/data/players.ts`.
+## Admin
+
+The `/admin` page manages the players used across every other page: add, edit, and remove players (name). NPCs are
+managed from the Admiration Matrix page instead (see above). Both live in `localStorage` under `dnd-wedding:npcs`
+and `dnd-wedding:players` — there's no more `app/data/npcs.ts` or `app/data/players.ts` to edit by hand. NPC images
+still live in `public/NPCs`; point the image field at `/NPCs/your-file.jpg`.
 
 ## Display
 

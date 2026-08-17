@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import type { Npc } from '~/data/npcs'
-import { npcs } from '~/data/npcs'
-import { players } from '~/data/players'
+import type { Npc } from '~/types/cast'
+
+const { npcs, hydrated: npcsHydrated, removeNpc } = useNpcs()
+const { players, hydrated: playersHydrated } = usePlayers()
 
 const {
-  hydrated,
+  hydrated: pointsHydrated,
   pointsFor,
   adjust,
   isAway,
@@ -16,9 +17,11 @@ const {
   reset
 } = useAdmirationGrid()
 
-const npcIds = npcs.map(npc => npc.id)
+const hydrated = computed(() => npcsHydrated.value && playersHydrated.value && pointsHydrated.value)
 
-const everyoneAway = computed(() => hydrated.value && allAway(npcIds))
+const npcIds = computed(() => npcs.value.map(npc => npc.id))
+
+const everyoneAway = computed(() => hydrated.value && allAway(npcIds.value))
 
 const resetOpen = ref(false)
 
@@ -28,6 +31,35 @@ function confirmReset() {
 }
 
 const infoNpc = ref<Npc | null>(null)
+
+const npcFormOpen = ref(false)
+const editingNpc = ref<Npc | null>(null)
+
+function openNewNpc(): void {
+  editingNpc.value = null
+  npcFormOpen.value = true
+}
+
+function editNpcFromView(npc: Npc): void {
+  infoNpc.value = null
+  editingNpc.value = npc
+  npcFormOpen.value = true
+}
+
+const npcDeleteTarget = ref<Npc | null>(null)
+
+function requestDeleteNpc(npc: Npc): void {
+  infoNpc.value = null
+  npcDeleteTarget.value = npc
+}
+
+function confirmRemoveNpc(): void {
+  if (npcDeleteTarget.value) {
+    removeNpc(npcDeleteTarget.value.id)
+  }
+
+  npcDeleteTarget.value = null
+}
 
 function pointsClass(value: number): string {
   if (value > 0) {
@@ -50,12 +82,21 @@ function pointsClass(value: number): string {
           Admiration Matrix
         </h1>
         <p class="text-sm text-muted">
-          Admiration points each NPC holds for each player. Send an NPC away to lock their row. Saved in this browser,
+          Points each NPC holds for each player. Send an NPC away to lock their row. Saved in this browser,
           synced across windows.
         </p>
       </div>
 
       <div class="flex items-center gap-2">
+        <UButton
+          color="neutral"
+          variant="subtle"
+          icon="i-lucide-plus"
+          @click="openNewNpc"
+        >
+          Add NPC
+        </UButton>
+
         <UButton
           color="neutral"
           variant="subtle"
@@ -81,7 +122,18 @@ function pointsClass(value: number): string {
         v-if="!hydrated"
         class="p-8 text-center text-sm text-muted"
       >
-        Loading admiration grid…
+        Loading points…
+      </div>
+
+      <div
+        v-else-if="!npcs.length || !players.length"
+        class="p-8 text-center text-sm text-muted"
+      >
+        No NPCs or players yet. Add them on the
+        <ULink to="/admin">
+          admin
+        </ULink>
+        page.
       </div>
 
       <table
@@ -184,7 +236,7 @@ function pointsClass(value: number): string {
                   color="neutral"
                   variant="ghost"
                   size="xs"
-                  :aria-label="`Lower ${npc.name} admiration for ${player.name}`"
+                  :aria-label="`Lower ${npc.name} points for ${player.name}`"
                   @click="adjust(npc.id, player.id, -1)"
                 />
                 <span
@@ -198,7 +250,7 @@ function pointsClass(value: number): string {
                   color="neutral"
                   variant="ghost"
                   size="xs"
-                  :aria-label="`Raise ${npc.name} admiration for ${player.name}`"
+                  :aria-label="`Raise ${npc.name} points for ${player.name}`"
                   @click="adjust(npc.id, player.id, 1)"
                 />
               </div>
@@ -210,7 +262,7 @@ function pointsClass(value: number): string {
 
     <UModal
       v-model:open="resetOpen"
-      title="Reset all admiration points?"
+      title="Reset all points?"
       description="Every cell goes back to 0. This cannot be undone."
     >
       <template #footer>
@@ -232,52 +284,39 @@ function pointsClass(value: number): string {
       </template>
     </UModal>
 
+    <NpcFormModal
+      v-model:open="npcFormOpen"
+      :npc="editingNpc"
+    />
+
+    <NpcViewModal
+      :npc="infoNpc"
+      @close="infoNpc = null"
+      @edit="editNpcFromView"
+      @delete="requestDeleteNpc"
+    />
+
     <UModal
-      :open="infoNpc !== null"
-      :title="infoNpc?.name"
-      :description="infoNpc?.info.role"
-      :ui="{ content: 'sm:max-w-2xl' }"
-      @update:open="value => { if (!value) infoNpc = null }"
+      :open="npcDeleteTarget !== null"
+      title="Remove NPC?"
+      :description="npcDeleteTarget ? `${npcDeleteTarget.name} will be removed. This cannot be undone.` : ''"
+      @update:open="value => { if (!value) npcDeleteTarget = null }"
     >
-      <template #body>
-        <div
-          v-if="infoNpc"
-          class="flex flex-col gap-4"
-        >
-          <div class="flex items-start gap-4">
-            <UAvatar
-              :src="infoNpc.image"
-              :alt="infoNpc.name"
-              size="3xl"
-              class="shrink-0"
-            />
-            <p class="text-sm text-muted">
-              {{ infoNpc.info.appearance }}
-            </p>
-          </div>
-
-          <p class="text-sm text-muted">
-            <span class="font-semibold text-highlighted">Gear:</span> {{ infoNpc.info.gear }}
-          </p>
-
-          <div class="grid grid-cols-1 gap-2 rounded-lg bg-elevated/50 p-3 text-sm sm:grid-cols-2">
-            <p><span class="font-semibold text-highlighted">Trait:</span> {{ infoNpc.info.trait }}</p>
-            <p><span class="font-semibold text-highlighted">Ideal:</span> {{ infoNpc.info.ideal }}</p>
-            <p><span class="font-semibold text-highlighted">Bond:</span> {{ infoNpc.info.bond }}</p>
-            <p><span class="font-semibold text-highlighted">Flaw:</span> {{ infoNpc.info.flaw }}</p>
-          </div>
-
-          <div
-            v-for="section in infoNpc.info.sections"
-            :key="section.title"
+      <template #footer>
+        <div class="flex justify-end gap-2 w-full">
+          <UButton
+            color="neutral"
+            variant="ghost"
+            @click="npcDeleteTarget = null"
           >
-            <h3 class="mb-1 font-semibold text-highlighted">
-              {{ section.title }}
-            </h3>
-            <p class="text-sm text-muted">
-              {{ section.body }}
-            </p>
-          </div>
+            Cancel
+          </UButton>
+          <UButton
+            color="error"
+            @click="confirmRemoveNpc"
+          >
+            Remove
+          </UButton>
         </div>
       </template>
     </UModal>

@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { npcs } from '~/data/npcs'
+const { npcs, hydrated: npcsHydrated } = useNpcs()
+const { hydrated: pointsHydrated, isAway, isIntroduced } = useAdmirationGrid()
 
-const { hydrated, isAway, isIntroduced } = useAdmirationGrid()
+const hydrated = computed(() => npcsHydrated.value && pointsHydrated.value)
 
-const presentNpcs = computed(() => hydrated.value ? npcs.filter(npc => !isAway(npc.id)) : [])
+const presentNpcs = computed(() => hydrated.value ? npcs.value.filter(npc => !isAway(npc.id)) : [])
 
 const columns = computed(() => Math.max(1, Math.ceil(Math.sqrt(presentNpcs.value.length))))
 const rows = computed(() => Math.max(1, Math.ceil(presentNpcs.value.length / columns.value)))

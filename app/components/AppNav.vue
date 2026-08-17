@@ -2,7 +2,8 @@
 const items = [
   { label: 'Admiration Matrix', icon: 'i-lucide-users', to: '/' },
   { label: 'The Dancing', icon: 'i-lucide-music', to: '/dancing' },
-  { label: 'NPC Display', icon: 'i-lucide-monitor', to: '/present', target: '_blank' }
+  { label: 'NPC Display', icon: 'i-lucide-monitor', to: '/present', target: '_blank' },
+  { label: 'Admin', icon: 'i-lucide-settings', to: '/admin' }
 ]
 </script>
 

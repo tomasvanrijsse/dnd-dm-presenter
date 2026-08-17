@@ -77,7 +77,17 @@ function pointsClass(value: number): string {
     </div>
 
     <div class="overflow-x-auto rounded-lg ring ring-default bg-default">
-      <table class="w-full table-fixed border-collapse text-sm">
+      <div
+        v-if="!hydrated"
+        class="p-8 text-center text-sm text-muted"
+      >
+        Loading admiration grid…
+      </div>
+
+      <table
+        v-else
+        class="w-full table-fixed border-collapse text-sm"
+      >
         <colgroup>
           <col class="w-[26rem]">
           <col
@@ -107,7 +117,7 @@ function pointsClass(value: number): string {
             v-for="npc in npcs"
             :key="npc.id"
             class="border-b border-default last:border-b-0 hover:bg-elevated/30"
-            :class="hydrated && isAway(npc.id) ? 'bg-elevated/20' : ''"
+            :class="isAway(npc.id) ? 'bg-elevated/20' : ''"
           >
             <th class="sticky left-0 z-10 bg-default px-4 py-2 text-left font-medium">
               <div class="flex items-center gap-3">
@@ -122,18 +132,18 @@ function pointsClass(value: number): string {
                     :alt="npc.name"
                     size="lg"
                     class="shrink-0"
-                    :class="hydrated && isAway(npc.id) ? 'grayscale opacity-50' : ''"
+                    :class="isAway(npc.id) ? 'grayscale opacity-50' : ''"
                   />
                   <span
                     class="truncate"
-                    :class="hydrated && isAway(npc.id) ? 'text-dimmed line-through' : 'text-highlighted'"
+                    :class="isAway(npc.id) ? 'text-dimmed line-through' : 'text-highlighted'"
                   >
                     {{ npc.name }}
                   </span>
                 </button>
 
                 <UBadge
-                  v-if="hydrated && isAway(npc.id)"
+                  v-if="isAway(npc.id)"
                   color="neutral"
                   variant="subtle"
                   size="sm"
@@ -145,15 +155,15 @@ function pointsClass(value: number): string {
                 <div class="ml-auto flex shrink-0 items-center gap-3">
                   <UButton
                     :icon="'i-lucide-handshake'"
-                    :color="hydrated && isIntroduced(npc.id) ? 'primary' : 'neutral'"
-                    :variant="hydrated && isIntroduced(npc.id) ? 'solid' : 'ghost'"
+                    :color="isIntroduced(npc.id) ? 'primary' : 'neutral'"
+                    :variant="isIntroduced(npc.id) ? 'solid' : 'ghost'"
                     size="xs"
                     :aria-label="`Toggle whether ${npc.name} has been introduced`"
                     @click="toggleIntroduced(npc.id)"
                   />
 
                   <USwitch
-                    :model-value="hydrated && isAway(npc.id)"
+                    :model-value="isAway(npc.id)"
                     label="Away"
                     size="sm"
                     :aria-label="`Toggle whether ${npc.name} is away`"
@@ -174,22 +184,20 @@ function pointsClass(value: number): string {
                   color="neutral"
                   variant="ghost"
                   size="xs"
-                  :class="hydrated && isAway(npc.id) ? 'invisible' : ''"
                   :aria-label="`Lower ${npc.name} admiration for ${player.name}`"
                   @click="adjust(npc.id, player.id, -1)"
                 />
                 <span
                   class="w-8 text-base font-semibold tabular-nums"
-                  :class="hydrated && isAway(npc.id) ? 'text-dimmed' : pointsClass(pointsFor(npc.id, player.id))"
+                  :class="pointsClass(pointsFor(npc.id, player.id))"
                 >
-                  {{ hydrated ? pointsFor(npc.id, player.id) : '–' }}
+                  {{ pointsFor(npc.id, player.id) }}
                 </span>
                 <UButton
                   icon="i-lucide-plus"
                   color="neutral"
                   variant="ghost"
                   size="xs"
-                  :class="hydrated && isAway(npc.id) ? 'invisible' : ''"
                   :aria-label="`Raise ${npc.name} admiration for ${player.name}`"
                   @click="adjust(npc.id, player.id, 1)"
                 />

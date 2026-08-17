@@ -143,21 +143,21 @@ function pointsClass(value: number): string {
                 </UBadge>
 
                 <div class="ml-auto flex shrink-0 items-center gap-3">
-                  <USwitch
-                    :model-value="hydrated && isIntroduced(npc.id)"
-                    label="Introduced"
-                    size="sm"
+                  <UButton
+                    :icon="'i-lucide-handshake'"
+                    :color="hydrated && isIntroduced(npc.id) ? 'primary' : 'neutral'"
+                    :variant="hydrated && isIntroduced(npc.id) ? 'solid' : 'ghost'"
+                    size="xs"
                     :aria-label="`Toggle whether ${npc.name} has been introduced`"
-                    @update:model-value="toggleIntroduced(npc.id)"
+                    @click="toggleIntroduced(npc.id)"
                   />
 
-                  <UButton
-                    :icon="hydrated && isAway(npc.id) ? 'i-lucide-user-check' : 'i-lucide-user-x'"
-                    color="neutral"
-                    variant="ghost"
-                    size="xs"
-                    :aria-label="hydrated && isAway(npc.id) ? `Bring ${npc.name} back` : `Send ${npc.name} away`"
-                    @click="toggleAway(npc.id)"
+                  <USwitch
+                    :model-value="hydrated && isAway(npc.id)"
+                    label="Away"
+                    size="sm"
+                    :aria-label="`Toggle whether ${npc.name} is away`"
+                    @update:model-value="toggleAway(npc.id)"
                   />
                 </div>
               </div>

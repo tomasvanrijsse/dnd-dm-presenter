@@ -100,15 +100,6 @@ function pointsClass(value: number): string {
         <UButton
           color="neutral"
           variant="subtle"
-          :icon="everyoneAway ? 'i-lucide-user-check' : 'i-lucide-user-x'"
-          @click="toggleAwayForAll(npcIds)"
-        >
-          {{ everyoneAway ? 'Bring everyone back' : 'Send everyone away' }}
-        </UButton>
-
-        <UButton
-          color="neutral"
-          variant="subtle"
           icon="i-lucide-rotate-ccw"
           @click="resetOpen = true"
         >
@@ -152,7 +143,19 @@ function pointsClass(value: number): string {
         <thead>
           <tr class="border-b border-default bg-elevated/50">
             <th class="sticky left-0 z-10 bg-elevated px-4 py-3 text-left font-semibold text-highlighted">
-              NPC
+              <div class="flex items-center justify-between gap-3">
+                NPC
+
+                <UButton
+                  color="neutral"
+                  variant="subtle"
+                  size="xs"
+                  :icon="everyoneAway ? 'i-lucide-user-check' : 'i-lucide-user-x'"
+                  @click="toggleAwayForAll(npcIds)"
+                >
+                  {{ everyoneAway ? 'Bring everyone back' : 'Send everyone away' }}
+                </UButton>
+              </div>
             </th>
             <th
               v-for="player in players"
@@ -194,16 +197,6 @@ function pointsClass(value: number): string {
                   </span>
                 </button>
 
-                <UBadge
-                  v-if="isAway(npc.id)"
-                  color="neutral"
-                  variant="subtle"
-                  size="sm"
-                  class="shrink-0"
-                >
-                  Away
-                </UBadge>
-
                 <div class="ml-auto flex shrink-0 items-center gap-3">
                   <UButton
                     :icon="'i-lucide-handshake'"
@@ -215,10 +208,11 @@ function pointsClass(value: number): string {
                   />
 
                   <USwitch
-                    :model-value="isAway(npc.id)"
-                    label="Away"
+                    :model-value="!isAway(npc.id)"
+                    :label="isAway(npc.id) ? 'Away' : 'Present'"
+                    :ui="{ label: 'w-16' }"
                     size="sm"
-                    :aria-label="`Toggle whether ${npc.name} is away`"
+                    :aria-label="`Toggle whether ${npc.name} is present`"
                     @update:model-value="toggleAway(npc.id)"
                   />
                 </div>

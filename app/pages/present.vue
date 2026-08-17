@@ -43,7 +43,7 @@ useHead({
 
         <div
           v-if="isIntroduced(npc.id)"
-          class="tangerine-bold shrink-0 bg-white py-1 text-center text-3xl text-black"
+          class="tangerine-bold shrink-0 bg-white py-1 text-center text-5xl text-black"
         >
           {{ npc.name }}
         </div>

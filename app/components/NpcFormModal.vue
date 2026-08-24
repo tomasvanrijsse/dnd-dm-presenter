@@ -18,6 +18,18 @@ watch(open, (isOpen) => {
   form.description = props.npc?.description ?? ''
 })
 
+function onImageFileChange(file: File | null | undefined): void {
+  if (!file) {
+    return
+  }
+
+  const reader = new FileReader()
+  reader.onload = () => {
+    form.image = String(reader.result)
+  }
+  reader.readAsDataURL(file)
+}
+
 function save(): void {
   const input = { name: form.name.trim(), image: form.image.trim(), description: form.description.trim() }
 
@@ -52,13 +64,22 @@ function save(): void {
 
         <UFormField
           label="Image"
-          hint="Path or URL"
+          hint="Stored in your browser"
         >
-          <UInput
-            v-model="form.image"
-            class="w-full"
-            placeholder="/NPCs/example.jpg"
-          />
+          <div class="flex items-center gap-3">
+            <img
+              v-if="form.image"
+              :src="form.image"
+              class="size-12 rounded object-cover"
+              alt=""
+            >
+            <UFileUpload
+              accept="image/*"
+              label="Choose image"
+              class="flex-1"
+              @update:model-value="onImageFileChange"
+            />
+          </div>
         </UFormField>
 
         <UFormField label="Description">

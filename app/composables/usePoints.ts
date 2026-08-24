@@ -1,11 +1,11 @@
-const POINTS_KEY = 'dnd-wedding:points'
-const AWAY_KEY = 'dnd-wedding:away-npcs'
-const INTRODUCED_KEY = 'dnd-wedding:introduced-npcs'
+const POINTS_KEY = 'dm-presenter:points'
+const AWAY_KEY = 'dm-presenter:away-npcs'
+const INTRODUCED_KEY = 'dm-presenter:introduced-npcs'
 
 type Points = Record<string, number>
 type NpcFlags = Record<string, boolean>
 
-export function useAdmirationGrid() {
+export function usePoints() {
   const points = useState<Points>('points', () => ({}))
   const hydrated = useState<boolean>('points-hydrated', () => false)
 

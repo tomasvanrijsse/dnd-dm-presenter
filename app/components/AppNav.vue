@@ -1,16 +1,59 @@
 <script setup lang="ts">
 const items = [
-  { label: 'Admiration Matrix', icon: 'i-lucide-users', to: '/' },
+  { label: 'Points', icon: 'i-lucide-users', to: '/' },
   { label: 'The Dancing', icon: 'i-lucide-music', to: '/dancing' },
   { label: 'NPC Display', icon: 'i-lucide-monitor', to: '/present', target: '_blank' },
   { label: 'Admin', icon: 'i-lucide-settings', to: '/admin' }
 ]
+
+const { exportState, importState } = useStateBackup()
+
+const fileInput = ref<HTMLInputElement>()
+
+function triggerLoad(): void {
+  fileInput.value?.click()
+}
+
+async function onFileSelected(event: Event): Promise<void> {
+  const file = (event.target as HTMLInputElement).files?.[0]
+
+  if (file) {
+    await importState(file)
+  }
+}
 </script>
 
 <template>
   <div class="border-b border-default bg-default">
-    <UContainer>
-      <UNavigationMenu :items="items" />
+    <UContainer class="flex items-center justify-between">
+      <UNavigationMenu
+        :items="items"
+        class="flex-1"
+      />
+
+      <div class="flex items-center gap-1">
+        <UButton
+          icon="i-lucide-save"
+          color="neutral"
+          variant="ghost"
+          title="Save state to zip"
+          @click="exportState"
+        />
+        <UButton
+          icon="i-lucide-download"
+          color="neutral"
+          variant="ghost"
+          title="Load state from zip"
+          @click="triggerLoad"
+        />
+        <input
+          ref="fileInput"
+          type="file"
+          accept="application/zip,.zip"
+          class="hidden"
+          @change="onFileSelected"
+        >
+      </div>
     </UContainer>
   </div>
 </template>

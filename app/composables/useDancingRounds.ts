@@ -1,4 +1,4 @@
-const ASSIGNMENTS_KEY = 'dnd-wedding:dancing-assignments'
+const ASSIGNMENTS_KEY = 'dm-presenter:dancing-assignments'
 
 export const DANCING_ROUNDS = 9
 export const NOT_DANCING_SLOT = 'not-dancing'

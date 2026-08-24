@@ -54,7 +54,7 @@ function confirmRemovePlayer(): void {
       </h1>
       <p class="text-sm text-muted">
         Manage the players used across the other pages. Saved in this browser, synced across windows. NPCs are
-        managed from the Admiration Matrix page.
+        managed from the Points page.
       </p>
     </div>
 

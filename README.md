@@ -1,8 +1,8 @@
-# DnD Wedding
+# DM Presenter
 
 Session tools for a DnD one shot, built with [Nuxt UI](https://ui.nuxt.com).
 
-## Admiration Matrix
+## Points
 
 The home page (`/`) is a grid of the NPCs (rows) against the players (columns). Each cell tracks how many points
 that NPC holds for that player. Points can go negative.
@@ -19,15 +19,15 @@ that NPC holds for that player. Points can go negative.
   whether the name shows up on the display (see below) — it has no effect on this page.
 - **Reset all** clears every cell. It leaves the away and introduced flags alone.
 
-State lives in `localStorage` under `dnd-wedding:points`, `dnd-wedding:away-npcs` and
-`dnd-wedding:introduced-npcs`, so it survives a reload and stays in sync between browser windows on the same machine.
+State lives in `localStorage` under `dm-presenter:points`, `dm-presenter:away-npcs` and
+`dm-presenter:introduced-npcs`, so it survives a reload and stays in sync between browser windows on the same machine.
 It is not shared across machines or browsers.
 
 ## Admin
 
 The `/admin` page manages the players used across every other page: add, edit, and remove players (name). NPCs are
-managed from the Admiration Matrix page instead (see above). Both live in `localStorage` under `dnd-wedding:npcs`
-and `dnd-wedding:players` — there's no more `app/data/npcs.ts` or `app/data/players.ts` to edit by hand. NPC images
+managed from the Points page instead (see above). Both live in `localStorage` under `dm-presenter:npcs`
+and `dm-presenter:players` — there's no more `app/data/npcs.ts` or `app/data/players.ts` to edit by hand. NPC images
 still live in `public/NPCs`; point the image field at `/NPCs/your-file.jpg`.
 
 ## Display

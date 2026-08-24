@@ -1,7 +1,7 @@
 import type { Npc, Player } from '~/types/cast'
 
-const NPCS_KEY = 'dnd-wedding:npcs'
-const PLAYERS_KEY = 'dnd-wedding:players'
+export const NPCS_KEY = 'dm-presenter:npcs'
+const PLAYERS_KEY = 'dm-presenter:players'
 
 export function useNpcs() {
   const npcs = useState<Npc[]>('npcs', () => [])

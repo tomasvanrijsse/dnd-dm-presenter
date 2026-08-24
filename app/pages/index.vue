@@ -15,7 +15,7 @@ const {
   isIntroduced,
   toggleIntroduced,
   reset
-} = useAdmirationGrid()
+} = usePoints()
 
 const hydrated = computed(() => npcsHydrated.value && playersHydrated.value && pointsHydrated.value)
 
@@ -79,7 +79,7 @@ function pointsClass(value: number): string {
     <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
       <div>
         <h1 class="text-2xl font-bold text-highlighted">
-          Admiration Matrix
+          Points
         </h1>
         <p class="text-sm text-muted">
           Points each NPC holds for each player. Send an NPC away to lock their row. Saved in this browser,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const { npcs, hydrated: npcsHydrated } = useNpcs()
-const { hydrated: pointsHydrated, isAway, isIntroduced } = useAdmirationGrid()
+const { hydrated: pointsHydrated, isAway, isIntroduced } = usePoints()
 
 const hydrated = computed(() => npcsHydrated.value && pointsHydrated.value)
 

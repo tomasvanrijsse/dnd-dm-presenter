@@ -23,6 +23,21 @@ async function onFileSelected(event: Event): Promise<void> {
     await importState(file)
   }
 }
+
+const { usedBytes, limitBytes, refresh: refreshStorageUsage } = useStorageUsage()
+const usagePercent = computed(() => Math.min(100, (usedBytes.value / limitBytes) * 100))
+const usageColor = computed(() => usagePercent.value >= 90 ? 'text-error' : 'text-muted')
+
+let storageUsagePoll: ReturnType<typeof setInterval>
+
+onMounted(() => {
+  refreshStorageUsage()
+  storageUsagePoll = setInterval(refreshStorageUsage, 3000)
+})
+
+onBeforeUnmount(() => {
+  clearInterval(storageUsagePoll)
+})
 </script>
 
 <template>
@@ -33,7 +48,14 @@ async function onFileSelected(event: Event): Promise<void> {
         class="flex-1"
       />
 
-      <div class="flex items-center gap-1">
+      <div class="flex items-center gap-3">
+        <span
+          class="text-xs whitespace-nowrap"
+          :class="usageColor"
+          :title="`${formatBytes(usedBytes)} of ~${formatBytes(limitBytes)} browser storage used`"
+        >
+          {{ formatBytes(usedBytes) }} / {{ formatBytes(limitBytes) }}
+        </span>
         <UButton
           icon="i-lucide-save"
           color="neutral"

@@ -23,6 +23,15 @@ State lives in `localStorage` under `dm-presenter:points`, `dm-presenter:away-np
 `dm-presenter:introduced-npcs`, so it survives a reload and stays in sync between browser windows on the same machine.
 It is not shared across machines or browsers.
 
+## Session Events
+
+The `/session-events` page tracks what happens round by round. **Add row** creates a row with an editable title
+(defaults to `Round N`) and a description of what's happening. Drag names from **Unassigned** into a group, or
+**Away**; groups have no size limit. The trash icon on a row removes it.
+
+State lives in `localStorage` under `dm-presenter:session-rows` and `dm-presenter:session-assignments`, so it
+survives a reload and stays in sync between browser windows on the same machine.
+
 ## Admin
 
 The `/admin` page manages the players used across every other page: add, edit, and remove players (name). NPCs are

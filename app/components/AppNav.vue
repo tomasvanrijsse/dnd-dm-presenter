@@ -1,9 +1,9 @@
 <script setup lang="ts">
 const items = [
-  { label: 'Points', icon: 'i-lucide-users', to: '/' },
-  { label: 'The Dancing', icon: 'i-lucide-music', to: '/dancing' },
+  { label: 'NPCs', icon: 'i-lucide-users', to: '/' },
+  { label: 'Session Events', icon: 'i-lucide-calendar-days', to: '/session-events' },
   { label: 'NPC Display', icon: 'i-lucide-monitor', to: '/present', target: '_blank' },
-  { label: 'Admin', icon: 'i-lucide-settings', to: '/admin' }
+  { label: 'Players', icon: 'i-lucide-settings', to: '/admin' }
 ]
 
 const { exportState, importState } = useStateBackup()

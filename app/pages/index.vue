@@ -79,11 +79,10 @@ function pointsClass(value: number): string {
     <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
       <div>
         <h1 class="text-2xl font-bold text-highlighted">
-          Points
+          NPCs & player points
         </h1>
         <p class="text-sm text-muted">
-          Points each NPC holds for each player. Send an NPC away to lock their row. Saved in this browser,
-          synced across windows.
+          Show the name and/or image of the NPC to the players. And keep track of points each NPC holds for each player.
         </p>
       </div>
 
@@ -117,7 +116,7 @@ function pointsClass(value: number): string {
       </div>
 
       <div
-        v-else-if="!npcs.length || !players.length"
+        v-else-if="!npcs.length"
         class="p-8 text-center text-sm text-muted"
       >
         No NPCs or players yet. Add them on the

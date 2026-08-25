@@ -1,9 +1,7 @@
 <script setup lang="ts">
 const npcsStore = useNpcsStore()
 const { npcs } = storeToRefs(npcsStore)
-
-const pointsStore = usePointsStore()
-const { isAway, isIntroduced, isSeen } = pointsStore
+const { isAway, isIntroduced, isSeen } = npcsStore
 
 const itemsStore = useItemsStore()
 const { items } = storeToRefs(itemsStore)

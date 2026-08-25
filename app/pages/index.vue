@@ -3,7 +3,17 @@ import type { Npc } from '~/types/cast'
 
 const npcsStore = useNpcsStore()
 const { npcs } = storeToRefs(npcsStore)
-const { removeNpc } = npcsStore
+const {
+  removeNpc,
+  isAway,
+  toggleAway,
+  allAway,
+  toggleAwayForAll,
+  isIntroduced,
+  toggleIntroduced,
+  isSeen,
+  toggleSeen
+} = npcsStore
 
 const playersStore = usePlayersStore()
 const { players } = storeToRefs(playersStore)
@@ -31,19 +41,7 @@ const displayedImage = computed(() => {
 })
 
 const pointsStore = usePointsStore()
-const {
-  pointsFor,
-  adjust,
-  isAway,
-  toggleAway,
-  allAway,
-  toggleAwayForAll,
-  isIntroduced,
-  toggleIntroduced,
-  isSeen,
-  toggleSeen,
-  reset
-} = pointsStore
+const { pointsFor, adjust, reset } = pointsStore
 
 const { hydrated } = storeToRefs(useHydrationStore())
 

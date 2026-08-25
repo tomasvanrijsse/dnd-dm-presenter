@@ -3,6 +3,9 @@ export interface Npc {
   name: string
   image: string
   description: string
+  away: boolean
+  introduced: boolean
+  seen: boolean
 }
 
 export interface Player {

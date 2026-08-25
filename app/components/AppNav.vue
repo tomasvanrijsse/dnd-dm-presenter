@@ -1,8 +1,10 @@
 <script setup lang="ts">
+const baseURL = useRuntimeConfig().app.baseURL.replace(/\/$/, '')
+
 const items = [
   { label: 'NPCs', icon: 'i-lucide-users', to: '/' },
   { label: 'Session Events', icon: 'i-lucide-calendar-days', to: '/session-events' },
-  { label: 'NPC Display', icon: 'i-lucide-monitor', to: '/present', target: '_blank' },
+  { label: 'NPC Display', icon: 'i-lucide-monitor', to: `${baseURL}/present`, target: '_blank' },
   { label: 'Players', icon: 'i-lucide-settings', to: '/admin' }
 ]
 

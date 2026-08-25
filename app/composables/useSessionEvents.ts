@@ -4,18 +4,28 @@ export interface SessionRow {
   description: string
 }
 
+export interface SessionGroup {
+  id: string
+  name: string
+}
+
 const ROWS_KEY = 'dm-presenter:session-rows'
 const ASSIGNMENTS_KEY = 'dm-presenter:session-assignments'
+const GROUPS_KEY = 'dm-presenter:session-groups'
 
 export const UNASSIGNED_SLOT = 'unassigned'
-export const GROUP_SLOTS = [1, 2, 3, 4, 5, 6].map(n => `group-${n}`)
 export const AWAY_SLOT = 'away'
 
 type Assignments = Record<string, string>
 
+function defaultGroups(): SessionGroup[] {
+  return [{ id: 'group-1', name: 'Group 1' }]
+}
+
 export function useSessionEvents() {
   const rows = useState<SessionRow[]>('session-rows', () => [])
   const assignments = useState<Assignments>('session-assignments', () => ({}))
+  const groups = useState<SessionGroup[]>('session-groups', () => defaultGroups())
   const hydrated = useState<boolean>('session-events-hydrated', () => false)
 
   function addRow(): void {
@@ -53,9 +63,22 @@ export function useSessionEvents() {
     persistAssignments()
   }
 
+  function setGroups(newGroups: SessionGroup[]): void {
+    const removedIds = groups.value.filter(group => !newGroups.some(newGroup => newGroup.id === group.id)).map(group => group.id)
+
+    groups.value = newGroups
+    persistGroups()
+
+    if (removedIds.length) {
+      assignments.value = Object.fromEntries(Object.entries(assignments.value).filter(([, slotId]) => !removedIds.includes(slotId)))
+      persistAssignments()
+    }
+  }
+
   onMounted(() => {
     rows.value = readRows()
     assignments.value = readAssignments()
+    groups.value = readGroups()
     hydrated.value = true
 
     window.addEventListener('storage', onStorage)
@@ -72,6 +95,10 @@ export function useSessionEvents() {
 
     if (event.key === ASSIGNMENTS_KEY) {
       assignments.value = readAssignments()
+    }
+
+    if (event.key === GROUPS_KEY) {
+      groups.value = readGroups()
     }
   }
 
@@ -107,6 +134,22 @@ export function useSessionEvents() {
     }
   }
 
+  function readGroups(): SessionGroup[] {
+    const raw = window.localStorage.getItem(GROUPS_KEY)
+
+    if (!raw) {
+      return defaultGroups()
+    }
+
+    try {
+      const parsed: unknown = JSON.parse(raw)
+
+      return isGroupArray(parsed) ? parsed : defaultGroups()
+    } catch {
+      return defaultGroups()
+    }
+  }
+
   function persistRows(): void {
     window.localStorage.setItem(ROWS_KEY, JSON.stringify(rows.value))
   }
@@ -115,15 +158,21 @@ export function useSessionEvents() {
     window.localStorage.setItem(ASSIGNMENTS_KEY, JSON.stringify(assignments.value))
   }
 
+  function persistGroups(): void {
+    window.localStorage.setItem(GROUPS_KEY, JSON.stringify(groups.value))
+  }
+
   return {
     rows,
+    groups,
     hydrated,
     addRow,
     updateRow,
     removeRow,
     slotFor,
     participantsInSlot,
-    assign
+    assign,
+    setGroups
   }
 }
 
@@ -142,5 +191,13 @@ function isRowArray(value: unknown): value is SessionRow[] {
     && typeof (entry as SessionRow).id === 'string'
     && typeof (entry as SessionRow).title === 'string'
     && typeof (entry as SessionRow).description === 'string'
+  )
+}
+
+function isGroupArray(value: unknown): value is SessionGroup[] {
+  return Array.isArray(value) && value.every(entry =>
+    typeof entry === 'object' && entry !== null
+    && typeof (entry as SessionGroup).id === 'string'
+    && typeof (entry as SessionGroup).name === 'string'
   )
 }

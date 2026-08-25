@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { AWAY_SLOT, GROUP_SLOTS, UNASSIGNED_SLOT, useSessionEvents } from '~/composables/useSessionEvents'
+import { AWAY_SLOT, UNASSIGNED_SLOT, useSessionEvents } from '~/composables/useSessionEvents'
+import type { SessionGroup } from '~/composables/useSessionEvents'
 
 const { npcs, hydrated: npcsHydrated } = useNpcs()
 const { players, hydrated: playersHydrated } = usePlayers()
-const { rows, hydrated: rowsHydrated, addRow, updateRow, removeRow, participantsInSlot, assign } = useSessionEvents()
+const { rows, groups, hydrated: rowsHydrated, addRow, updateRow, removeRow, participantsInSlot, assign, setGroups } = useSessionEvents()
 
 const hydrated = computed(() => npcsHydrated.value && playersHydrated.value && rowsHydrated.value)
 
@@ -14,7 +15,14 @@ const participants = computed(() => [
 
 const participantIds = computed(() => participants.value.map(participant => participant.id))
 
-const TABLE_COLUMNS = 2 + GROUP_SLOTS.length
+const TABLE_COLUMNS = computed(() => 2 + groups.value.length)
+const groupColumnWidth = computed(() => `${58 / Math.max(groups.value.length, 1)}%`)
+
+const manageGroupsOpen = ref(false)
+
+function onSaveGroups(newGroups: SessionGroup[]): void {
+  setGroups(newGroups)
+}
 
 const CHIP_BASE = 'cursor-grab select-none whitespace-nowrap rounded-full px-2 py-1 text-xs active:cursor-grabbing'
 const PLAYER_CHIP_CLASS = 'bg-green-100 text-green-900 dark:bg-green-950/40 dark:text-green-200'
@@ -40,11 +48,7 @@ function slotLabel(slotId: string): string {
     return 'Unassigned'
   }
 
-  if (slotId === AWAY_SLOT) {
-    return 'Away'
-  }
-
-  return `Group ${slotId.replace('group-', '')}`
+  return 'Away'
 }
 
 function onDragStart(event: DragEvent, rowId: string, participantId: string): void {
@@ -86,19 +90,29 @@ function confirmRemoveRow(): void {
           Session Events
         </h1>
         <p class="text-sm text-muted">
-          Track what's happening round by round. Drag names from Unassigned into a group, or Away. Saved in this
-          browser, synced across windows.
+          Track what's happening between events, to track NPC movement and locations. Drag names from Unassigned into a group, or Away.
         </p>
       </div>
 
-      <UButton
-        color="neutral"
-        variant="subtle"
-        icon="i-lucide-plus"
-        @click="addRow"
-      >
-        Add row
-      </UButton>
+      <div class="flex items-center gap-2">
+        <UButton
+          color="neutral"
+          variant="subtle"
+          icon="i-lucide-users"
+          @click="manageGroupsOpen = true"
+        >
+          Manage groups
+        </UButton>
+
+        <UButton
+          color="neutral"
+          variant="subtle"
+          icon="i-lucide-plus"
+          @click="addRow"
+        >
+          Add row
+        </UButton>
+      </div>
     </div>
 
     <div
@@ -110,9 +124,9 @@ function confirmRemoveRow(): void {
           <col class="w-[18%]">
           <col class="w-[12%]">
           <col
-            v-for="slotId in GROUP_SLOTS"
-            :key="slotId"
-            class="w-[9%]"
+            v-for="group in groups"
+            :key="group.id"
+            :style="{ width: groupColumnWidth }"
           >
           <col class="w-[12%]">
           <col class="w-10">
@@ -127,11 +141,11 @@ function confirmRemoveRow(): void {
               {{ slotLabel(UNASSIGNED_SLOT) }}
             </th>
             <th
-              v-for="slotId in GROUP_SLOTS"
-              :key="slotId"
+              v-for="group in groups"
+              :key="group.id"
               class="px-4 py-3 text-left font-semibold text-highlighted"
             >
-              {{ slotLabel(slotId) }}
+              {{ group.name }}
             </th>
             <th class="px-4 py-3 text-left font-semibold text-highlighted">
               {{ slotLabel(AWAY_SLOT) }}
@@ -145,6 +159,26 @@ function confirmRemoveRow(): void {
             v-for="(row, index) in rows"
             :key="row.id"
           >
+            <tr
+              class="border-b border-default last:border-b-0"
+              :class="rowClass(index)"
+            >
+              <td
+                :colspan="TABLE_COLUMNS + 2"
+                class="px-4 py-2"
+              >
+                <UTextarea
+                  :model-value="row.description"
+                  size="sm"
+                  variant="ghost"
+                  autoresize
+                  placeholder="What's happening…"
+                  class="w-full"
+                  @update:model-value="value => updateRow(row.id, { description: String(value) })"
+                />
+              </td>
+            </tr>
+
             <tr
               class="border-b border-default/60"
               :class="rowClass(index)"
@@ -178,15 +212,15 @@ function confirmRemoveRow(): void {
               </td>
 
               <td
-                v-for="slotId in GROUP_SLOTS"
-                :key="slotId"
+                v-for="group in groups"
+                :key="group.id"
                 class="min-h-16 min-w-0 px-2 py-2 align-top"
                 @dragover.prevent
-                @drop="onDrop($event, row.id, slotId)"
+                @drop="onDrop($event, row.id, group.id)"
               >
                 <div class="flex min-h-8 flex-wrap gap-1 rounded-md ring-1 ring-dashed ring-default p-1">
                   <div
-                    v-for="participantId in participantsInSlot(row.id, slotId, participantIds)"
+                    v-for="participantId in participantsInSlot(row.id, group.id, participantIds)"
                     :key="participantId"
                     draggable="true"
                     :class="chipClass(participantId)"
@@ -202,7 +236,7 @@ function confirmRemoveRow(): void {
                 @dragover.prevent
                 @drop="onDrop($event, row.id, AWAY_SLOT)"
               >
-                <div class="flex flex-wrap gap-1">
+                <div class="flex min-h-8 flex-wrap gap-1 rounded-md ring-1 ring-dashed ring-default p-1">
                   <div
                     v-for="participantId in participantsInSlot(row.id, AWAY_SLOT, participantIds)"
                     :key="participantId"
@@ -223,26 +257,6 @@ function confirmRemoveRow(): void {
                   size="xs"
                   :aria-label="`Remove ${row.title}`"
                   @click="rowDeleteTarget = row.id"
-                />
-              </td>
-            </tr>
-
-            <tr
-              class="border-b border-default last:border-b-0"
-              :class="rowClass(index)"
-            >
-              <td
-                :colspan="TABLE_COLUMNS + 2"
-                class="px-4 py-2"
-              >
-                <UTextarea
-                  :model-value="row.description"
-                  size="sm"
-                  variant="ghost"
-                  autoresize
-                  placeholder="What's happening…"
-                  class="w-full"
-                  @update:model-value="value => updateRow(row.id, { description: String(value) })"
                 />
               </td>
             </tr>
@@ -284,5 +298,11 @@ function confirmRemoveRow(): void {
         </div>
       </template>
     </UModal>
+
+    <ManageGroupsModal
+      v-model:open="manageGroupsOpen"
+      :groups="groups"
+      @save="onSaveGroups"
+    />
   </div>
 </template>

@@ -8,6 +8,14 @@ const { removeNpc } = npcsStore
 const playersStore = usePlayersStore()
 const { players } = storeToRefs(playersStore)
 
+const itemsStore = useItemsStore()
+const { items } = storeToRefs(itemsStore)
+const { addItem, removeItem } = itemsStore
+
+const locationsStore = useLocationsStore()
+const { locations } = storeToRefs(locationsStore)
+const { addLocation, removeLocation } = locationsStore
+
 const pointsStore = usePointsStore()
 const {
   pointsFor,
@@ -65,6 +73,14 @@ function confirmRemoveNpc(): void {
   }
 
   npcDeleteTarget.value = null
+}
+
+async function onAddItem(file: File): Promise<void> {
+  addItem(await convertImageFileToWebp(file))
+}
+
+async function onAddLocation(file: File): Promise<void> {
+  addLocation(await convertImageFileToWebp(file))
 }
 
 function pointsClass(value: number): string {
@@ -270,6 +286,26 @@ function pointsClass(value: number): string {
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="mt-8 flex flex-col gap-8">
+      <GalleryGrid
+        title="Items"
+        add-label="Add item"
+        kind="item"
+        :images="items"
+        @add="onAddItem"
+        @remove="removeItem"
+      />
+
+      <GalleryGrid
+        title="Locations"
+        add-label="Add location"
+        kind="location"
+        :images="locations"
+        @add="onAddLocation"
+        @remove="removeLocation"
+      />
     </div>
 
     <UModal

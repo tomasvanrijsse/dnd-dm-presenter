@@ -5,7 +5,26 @@ const { npcs } = storeToRefs(npcsStore)
 const pointsStore = usePointsStore()
 const { isAway, isIntroduced, isSeen } = pointsStore
 
+const itemsStore = useItemsStore()
+const { items } = storeToRefs(itemsStore)
+
+const locationsStore = useLocationsStore()
+const { locations } = storeToRefs(locationsStore)
+
+const displayStore = useDisplayStore()
+const { displayed } = storeToRefs(displayStore)
+
 const { hydrated } = storeToRefs(useHydrationStore())
+
+const displayedImage = computed(() => {
+  if (!displayed.value) {
+    return null
+  }
+
+  const list = displayed.value.kind === 'item' ? items.value : locations.value
+
+  return list.find(entry => entry.id === displayed.value?.id)?.image ?? null
+})
 
 const presentNpcs = computed(() => hydrated.value ? npcs.value.filter(npc => !isAway(npc.id)) : [])
 
@@ -27,7 +46,18 @@ useHead({
 <template>
   <div class="fixed inset-0 overflow-hidden bg-white mb-8">
     <div
-      v-if="presentNpcs.length"
+      v-if="displayedImage"
+      class="flex h-full w-full items-center justify-center bg-black"
+    >
+      <img
+        :src="displayedImage"
+        alt=""
+        class="max-h-full max-w-full object-contain"
+      >
+    </div>
+
+    <div
+      v-else-if="presentNpcs.length"
       class="grid h-full w-full overflow-hidden"
       :style="{
         gridTemplateColumns: `repeat(${columns}, 1fr)`,

@@ -16,6 +16,20 @@ const locationsStore = useLocationsStore()
 const { locations } = storeToRefs(locationsStore)
 const { addLocation, removeLocation } = locationsStore
 
+const displayStore = useDisplayStore()
+const { displayed } = storeToRefs(displayStore)
+const { clearDisplay } = displayStore
+
+const displayedImage = computed(() => {
+  if (!displayed.value) {
+    return null
+  }
+
+  const list = displayed.value.kind === 'item' ? items.value : locations.value
+
+  return list.find(entry => entry.id === displayed.value?.id)?.image ?? null
+})
+
 const pointsStore = usePointsStore()
 const {
   pointsFor,
@@ -366,6 +380,22 @@ function pointsClass(value: number): string {
             Remove
           </UButton>
         </div>
+      </template>
+    </UModal>
+
+    <UModal
+      :open="displayedImage !== null"
+      :title="displayed?.kind === 'item' ? 'Displaying item' : 'Displaying location'"
+      :ui="{ content: 'sm:max-w-2xl' }"
+      @update:open="value => { if (!value) clearDisplay() }"
+    >
+      <template #body>
+        <img
+          v-if="displayedImage"
+          :src="displayedImage"
+          alt=""
+          class="max-h-[70vh] w-full rounded object-contain"
+        >
       </template>
     </UModal>
   </UContainer>

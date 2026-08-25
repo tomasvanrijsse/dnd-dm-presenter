@@ -18,7 +18,11 @@ export const useDisplayStore = defineStore('display', () => {
     displayed.value = isDisplayed(kind, id) ? null : { kind, id }
   }
 
-  return { displayed, isDisplayed, toggleDisplay }
+  function clearDisplay(): void {
+    displayed.value = null
+  }
+
+  return { displayed, isDisplayed, toggleDisplay, clearDisplay }
 }, {
   persist: { key: DISPLAYED_KEY, ...fieldPersistence('displayed', isDisplayedEntry, () => null) }
 })

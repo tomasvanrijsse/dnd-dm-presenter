@@ -9,13 +9,19 @@ export default defineNuxtConfig({
     enabled: true
   },
 
-  css: ['~/assets/css/main.css'],
-
-  routeRules: {
-    '/': { prerender: true }
+  app: {
+    baseURL: process.env.NUXT_APP_BASE_URL ?? '/'
   },
 
+  css: ['~/assets/css/main.css'],
+
   compatibilityDate: '2026-06-30',
+
+  nitro: {
+    prerender: {
+      routes: ['/', '/admin', '/session-events', '/present']
+    }
+  },
 
   eslint: {
     config: {

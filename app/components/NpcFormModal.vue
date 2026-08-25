@@ -18,16 +18,12 @@ watch(open, (isOpen) => {
   form.description = props.npc?.description ?? ''
 })
 
-function onImageFileChange(file: File | null | undefined): void {
+async function onImageFileChange(file: File | null | undefined): Promise<void> {
   if (!file) {
     return
   }
 
-  const reader = new FileReader()
-  reader.onload = () => {
-    form.image = String(reader.result)
-  }
-  reader.readAsDataURL(file)
+  form.image = await convertImageFileToWebp(file)
 }
 
 function save(): void {

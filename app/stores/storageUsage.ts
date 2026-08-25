@@ -1,7 +1,7 @@
 const ESTIMATED_LIMIT_BYTES = 5 * 1024 * 1024
 
-export function useStorageUsage() {
-  const usedBytes = useState<number>('storage-used-bytes', () => 0)
+export const useStorageUsageStore = defineStore('storage-usage', () => {
+  const usedBytes = ref(0)
 
   function refresh(): void {
     let total = 0
@@ -20,4 +20,4 @@ export function useStorageUsage() {
   }
 
   return { usedBytes, limitBytes: ESTIMATED_LIMIT_BYTES, refresh }
-}
+})

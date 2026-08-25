@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import type { Player } from '~/types/cast'
 
-const { players, hydrated, addPlayer, updatePlayer, removePlayer } = usePlayers()
+const playersStore = usePlayersStore()
+const { players } = storeToRefs(playersStore)
+const { addPlayer, updatePlayer, removePlayer } = playersStore
+
+const { hydrated } = storeToRefs(useHydrationStore())
 
 const playerModalOpen = ref(false)
 const editingPlayerId = ref<string | null>(null)

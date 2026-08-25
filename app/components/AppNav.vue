@@ -24,7 +24,9 @@ async function onFileSelected(event: Event): Promise<void> {
   }
 }
 
-const { usedBytes, limitBytes, refresh: refreshStorageUsage } = useStorageUsage()
+const storageUsageStore = useStorageUsageStore()
+const { usedBytes } = storeToRefs(storageUsageStore)
+const { limitBytes, refresh: refreshStorageUsage } = storageUsageStore
 const usagePercent = computed(() => Math.min(100, (usedBytes.value / limitBytes) * 100))
 const usageColor = computed(() => usagePercent.value >= 90 ? 'text-error' : 'text-muted')
 

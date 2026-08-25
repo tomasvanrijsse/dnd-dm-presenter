@@ -1,12 +1,18 @@
 <script setup lang="ts">
-import { AWAY_SLOT, UNASSIGNED_SLOT, useSessionEvents } from '~/composables/useSessionEvents'
-import type { SessionGroup } from '~/composables/useSessionEvents'
+import { AWAY_SLOT, UNASSIGNED_SLOT } from '~/stores/sessionEvents'
+import type { SessionGroup } from '~/stores/sessionEvents'
 
-const { npcs, hydrated: npcsHydrated } = useNpcs()
-const { players, hydrated: playersHydrated } = usePlayers()
-const { rows, groups, hydrated: rowsHydrated, addRow, updateRow, removeRow, participantsInSlot, assign, setGroups } = useSessionEvents()
+const npcsStore = useNpcsStore()
+const { npcs } = storeToRefs(npcsStore)
 
-const hydrated = computed(() => npcsHydrated.value && playersHydrated.value && rowsHydrated.value)
+const playersStore = usePlayersStore()
+const { players } = storeToRefs(playersStore)
+
+const sessionEventsStore = useSessionEventsStore()
+const { rows, groups } = storeToRefs(sessionEventsStore)
+const { addRow, updateRow, removeRow, participantsInSlot, assign, setGroups } = sessionEventsStore
+
+const { hydrated } = storeToRefs(useHydrationStore())
 
 const participants = computed(() => [
   ...players.value.map(player => ({ id: player.id, name: player.name, isPlayer: true })),

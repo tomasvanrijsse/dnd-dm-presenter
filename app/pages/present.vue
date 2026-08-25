@@ -1,8 +1,11 @@
 <script setup lang="ts">
-const { npcs, hydrated: npcsHydrated } = useNpcs()
-const { hydrated: pointsHydrated, isAway, isIntroduced, isSeen } = usePoints()
+const npcsStore = useNpcsStore()
+const { npcs } = storeToRefs(npcsStore)
 
-const hydrated = computed(() => npcsHydrated.value && pointsHydrated.value)
+const pointsStore = usePointsStore()
+const { isAway, isIntroduced, isSeen } = pointsStore
+
+const { hydrated } = storeToRefs(useHydrationStore())
 
 const presentNpcs = computed(() => hydrated.value ? npcs.value.filter(npc => !isAway(npc.id)) : [])
 

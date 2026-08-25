@@ -4,7 +4,7 @@ import type { Npc } from '~/types/cast'
 const props = defineProps<{ npc?: Npc | null }>()
 const open = defineModel<boolean>('open', { default: false })
 
-const { addNpc, updateNpc } = useNpcs()
+const { addNpc, updateNpc } = useNpcsStore()
 
 const form = reactive({ name: '', image: '', description: '' })
 

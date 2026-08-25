@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import type { Npc } from '~/types/cast'
 
-const { npcs, hydrated: npcsHydrated, removeNpc } = useNpcs()
-const { players, hydrated: playersHydrated } = usePlayers()
+const npcsStore = useNpcsStore()
+const { npcs } = storeToRefs(npcsStore)
+const { removeNpc } = npcsStore
 
+const playersStore = usePlayersStore()
+const { players } = storeToRefs(playersStore)
+
+const pointsStore = usePointsStore()
 const {
-  hydrated: pointsHydrated,
   pointsFor,
   adjust,
   isAway,
@@ -17,9 +21,9 @@ const {
   isSeen,
   toggleSeen,
   reset
-} = usePoints()
+} = pointsStore
 
-const hydrated = computed(() => npcsHydrated.value && playersHydrated.value && pointsHydrated.value)
+const { hydrated } = storeToRefs(useHydrationStore())
 
 const npcIds = computed(() => npcs.value.map(npc => npc.id))
 
@@ -199,7 +203,7 @@ function pointsClass(value: number): string {
                 </button>
 
                 <div class="ml-auto flex shrink-0 items-center gap-3">
-                  <UTooltip :text="`Toggle whether ${npc.name} has been introduced`">
+                  <UTooltip :text="`Toggle whether ${npc.name}'s name is known`">
                     <UButton
                       :icon="'i-lucide-handshake'"
                       :color="isIntroduced(npc.id) ? 'primary' : 'neutral'"

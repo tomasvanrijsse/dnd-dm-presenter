@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SessionGroup } from '~/composables/useSessionEvents'
+import type { SessionGroup } from '~/stores/sessionEvents'
 
 const props = defineProps<{ groups: SessionGroup[] }>()
 const emit = defineEmits<{ save: [groups: SessionGroup[]] }>()

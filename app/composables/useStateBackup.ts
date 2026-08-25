@@ -1,6 +1,6 @@
 import { strToU8, unzipSync, zipSync } from 'fflate'
 import type { Npc } from '~/types/cast'
-import { NPCS_KEY } from '~/composables/useCast'
+import { NPCS_KEY } from '~/stores/npcs'
 
 const STORAGE_PREFIX = 'dm-presenter:'
 const IMAGES_DIR = 'images/'

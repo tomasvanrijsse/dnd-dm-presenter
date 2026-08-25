@@ -1,6 +1,12 @@
 <script setup>
 const route = useRoute()
 
+const { markHydrated } = useHydrationStore()
+
+onMounted(() => {
+  markHydrated()
+})
+
 useHead({
   meta: [
     { name: 'viewport', content: 'width=device-width, initial-scale=1' }

@@ -19,7 +19,7 @@ export const AWAY_SLOT = 'away'
 type Assignments = Record<string, string>
 
 function defaultGroups(): SessionGroup[] {
-  return [{ id: 'group-1', name: 'Group 1' }]
+  return [{ id: 'group-1', name: 'Location 1' }]
 }
 
 export function useSessionEvents() {

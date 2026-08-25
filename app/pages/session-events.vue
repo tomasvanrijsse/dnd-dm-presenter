@@ -101,7 +101,7 @@ function confirmRemoveRow(): void {
           icon="i-lucide-users"
           @click="manageGroupsOpen = true"
         >
-          Manage groups
+          Manage locations
         </UButton>
 
         <UButton
@@ -164,7 +164,7 @@ function confirmRemoveRow(): void {
               :class="rowClass(index)"
             >
               <td
-                :colspan="TABLE_COLUMNS + 2"
+                :colspan="TABLE_COLUMNS + 1"
                 class="px-4 py-2"
               >
                 <UTextarea
@@ -175,6 +175,16 @@ function confirmRemoveRow(): void {
                   placeholder="What's happening…"
                   class="w-full"
                   @update:model-value="value => updateRow(row.id, { description: String(value) })"
+                />
+              </td>
+              <td class="px-2 py-2 align-top text-right">
+                <UButton
+                  icon="i-lucide-trash-2"
+                  color="neutral"
+                  variant="ghost"
+                  size="xs"
+                  :aria-label="`Remove ${row.title}`"
+                  @click="rowDeleteTarget = row.id"
                 />
               </td>
             </tr>
@@ -233,6 +243,7 @@ function confirmRemoveRow(): void {
 
               <td
                 class="min-h-16 px-2 py-2 align-top"
+                colspan="2"
                 @dragover.prevent
                 @drop="onDrop($event, row.id, AWAY_SLOT)"
               >
@@ -247,17 +258,6 @@ function confirmRemoveRow(): void {
                     {{ nameFor(participantId) }}
                   </div>
                 </div>
-              </td>
-
-              <td class="px-2 py-2 align-top text-right">
-                <UButton
-                  icon="i-lucide-trash-2"
-                  color="neutral"
-                  variant="ghost"
-                  size="xs"
-                  :aria-label="`Remove ${row.title}`"
-                  @click="rowDeleteTarget = row.id"
-                />
               </td>
             </tr>
           </template>

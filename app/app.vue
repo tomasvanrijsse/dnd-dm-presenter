@@ -13,8 +13,8 @@ useHead({
   }
 })
 
-const title = 'DM Presenter — Points'
-const description = 'Track how many points each NPC holds for each player during the one shot.'
+const title = 'DM NPC Presenter'
+const description = 'Session tool for a DND game master, use a second screen like an iPad to display the NPCs to the players.\n'
 
 useSeoMeta({
   title,

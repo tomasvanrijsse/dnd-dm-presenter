@@ -197,14 +197,16 @@ function pointsClass(value: number): string {
                 </button>
 
                 <div class="ml-auto flex shrink-0 items-center gap-3">
-                  <UButton
-                    :icon="'i-lucide-handshake'"
-                    :color="isIntroduced(npc.id) ? 'primary' : 'neutral'"
-                    :variant="isIntroduced(npc.id) ? 'solid' : 'ghost'"
-                    size="xs"
-                    :aria-label="`Toggle whether ${npc.name} has been introduced`"
-                    @click="toggleIntroduced(npc.id)"
-                  />
+                  <UTooltip :text="`Toggle whether ${npc.name} has been introduced`">
+                    <UButton
+                      :icon="'i-lucide-handshake'"
+                      :color="isIntroduced(npc.id) ? 'primary' : 'neutral'"
+                      :variant="isIntroduced(npc.id) ? 'solid' : 'ghost'"
+                      size="xs"
+                      :aria-label="`Toggle whether ${npc.name}'s name is known`"
+                      @click="toggleIntroduced(npc.id)"
+                    />
+                  </UTooltip>
 
                   <USwitch
                     :model-value="!isAway(npc.id)"

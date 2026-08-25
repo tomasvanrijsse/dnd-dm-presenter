@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const { npcs, hydrated: npcsHydrated } = useNpcs()
-const { hydrated: pointsHydrated, isAway, isIntroduced } = usePoints()
+const { hydrated: pointsHydrated, isAway, isIntroduced, isSeen } = usePoints()
 
 const hydrated = computed(() => npcsHydrated.value && pointsHydrated.value)
 
@@ -40,6 +40,7 @@ useHead({
           :src="npc.image"
           :alt="npc.name"
           class="block min-h-0 w-full flex-1 object-contain"
+          :class="isSeen(npc.id) ? '' : 'blur-xl'"
         >
 
         <div

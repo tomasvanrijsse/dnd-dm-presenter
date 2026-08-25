@@ -14,6 +14,8 @@ const {
   toggleAwayForAll,
   isIntroduced,
   toggleIntroduced,
+  isSeen,
+  toggleSeen,
   reset
 } = usePoints()
 
@@ -205,6 +207,17 @@ function pointsClass(value: number): string {
                       size="xs"
                       :aria-label="`Toggle whether ${npc.name}'s name is known`"
                       @click="toggleIntroduced(npc.id)"
+                    />
+                  </UTooltip>
+
+                  <UTooltip :text="`Toggle whether ${npc.name} has been seen`">
+                    <UButton
+                      :icon="'i-lucide-eye'"
+                      :color="isSeen(npc.id) ? 'primary' : 'neutral'"
+                      :variant="isSeen(npc.id) ? 'solid' : 'ghost'"
+                      size="xs"
+                      :aria-label="`Toggle whether ${npc.name} has been seen`"
+                      @click="toggleSeen(npc.id)"
                     />
                   </UTooltip>
 

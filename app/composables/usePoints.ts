@@ -1,6 +1,7 @@
 const POINTS_KEY = 'dm-presenter:points'
 const AWAY_KEY = 'dm-presenter:away-npcs'
 const INTRODUCED_KEY = 'dm-presenter:introduced-npcs'
+const SEEN_KEY = 'dm-presenter:seen-npcs'
 
 type Points = Record<string, number>
 type NpcFlags = Record<string, boolean>
@@ -11,6 +12,7 @@ export function usePoints() {
 
   const away = useBooleanFlags(AWAY_KEY, 'away-npcs')
   const introduced = useBooleanFlags(INTRODUCED_KEY, 'introduced-npcs')
+  const seen = useBooleanFlags(SEEN_KEY, 'seen-npcs')
 
   function pointsFor(npcId: string, playerId: string): number {
     return points.value[cellKey(npcId, playerId)] ?? 0
@@ -34,6 +36,7 @@ export function usePoints() {
     points.value = readPoints()
     away.read()
     introduced.read()
+    seen.read()
     hydrated.value = true
 
     window.addEventListener('storage', onStorage)
@@ -50,6 +53,7 @@ export function usePoints() {
 
     away.onStorage(event)
     introduced.onStorage(event)
+    seen.onStorage(event)
   }
 
   function readPoints(): Points {
@@ -74,6 +78,8 @@ export function usePoints() {
     toggleAwayForAll: away.toggleForAll,
     isIntroduced: introduced.isSet,
     toggleIntroduced: introduced.toggle,
+    isSeen: seen.isSet,
+    toggleSeen: seen.toggle,
     reset
   }
 }

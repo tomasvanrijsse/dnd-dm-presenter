@@ -82,7 +82,7 @@ function pointsClass(value: number): string {
           NPCs & player points
         </h1>
         <p class="text-sm text-muted">
-          Show the name and/or image of the NPC to the players. And keep track of points each NPC holds for each player.
+          Show the name and/or image of the NPC to the players. And track the points each NPC holds for each player.
         </p>
       </div>
 
@@ -112,7 +112,7 @@ function pointsClass(value: number): string {
         v-if="!hydrated"
         class="p-8 text-center text-sm text-muted"
       >
-        Loading points…
+        Loading NPCs…
       </div>
 
       <div

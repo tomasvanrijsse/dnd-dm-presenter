@@ -6,9 +6,9 @@ const open = defineModel<boolean>('open', { default: false })
 const emit = defineEmits<{ accept: [image: GeneratedNpcImage] }>()
 
 const { apiKey } = useLeonardoApiKey()
-const { npcs } = useNpcsStore()
+const { npcs } = storeToRefs(useNpcsStore())
 
-const looksLikeOptions = computed(() => npcs
+const looksLikeOptions = computed(() => npcs.value
   .filter(npc => npc.image)
   .map(npc => ({
     label: npc.name,
@@ -44,7 +44,7 @@ async function generate(): Promise<void> {
   generatedImage.value = null
 
   try {
-    const looksLikeNpc = npcs.find(npc => npc.id === looksLikeNpcId.value)
+    const looksLikeNpc = npcs.value.find(npc => npc.id === looksLikeNpcId.value)
 
     generatedImage.value = await generateLeonardoNpcImage(apiKey.value, {
       species: props.species,

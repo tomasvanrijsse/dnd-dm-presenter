@@ -135,8 +135,9 @@ function pointsClass(value: number): string {
           variant="subtle"
           icon="i-lucide-rotate-ccw"
           @click="resetOpen = true"
+          v-if="players.length > 0"
         >
-          Reset all
+          Reset points
         </UButton>
       </div>
     </div>

@@ -2,6 +2,11 @@ export interface Npc {
   id: string
   name: string
   image: string
+  leonardoImageId?: string
+  species?: string
+  gender?: string
+  age?: string
+  role?: string
   description: string
   away: boolean
   introduced: boolean

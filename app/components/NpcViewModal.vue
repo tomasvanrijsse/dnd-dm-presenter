@@ -29,17 +29,53 @@ const emit = defineEmits<{
             size="3xl"
             class="shrink-0"
           />
-          <div
-            v-if="npc.description"
-            class="rich-text-content text-sm text-muted"
-            v-html="npc.description"
-          />
-          <p
-            v-else
-            class="text-sm text-muted"
-          >
-            No description yet.
-          </p>
+          <div class="flex flex-col gap-2">
+            <div
+              v-if="npc.species || npc.gender || npc.age || npc.role"
+              class="flex flex-wrap gap-1"
+            >
+              <UBadge
+                v-if="npc.species"
+                color="neutral"
+                variant="subtle"
+              >
+                {{ npc.species }}
+              </UBadge>
+              <UBadge
+                v-if="npc.gender"
+                color="neutral"
+                variant="subtle"
+              >
+                {{ npc.gender }}
+              </UBadge>
+              <UBadge
+                v-if="npc.age"
+                color="neutral"
+                variant="subtle"
+              >
+                {{ npc.age }}
+              </UBadge>
+              <UBadge
+                v-if="npc.role"
+                color="neutral"
+                variant="subtle"
+              >
+                {{ npc.role }}
+              </UBadge>
+            </div>
+
+            <div
+              v-if="npc.description"
+              class="rich-text-content text-sm text-muted"
+              v-html="npc.description"
+            />
+            <p
+              v-else
+              class="text-sm text-muted"
+            >
+              No description yet.
+            </p>
+          </div>
         </div>
       </div>
     </template>

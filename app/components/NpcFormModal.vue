@@ -1,12 +1,25 @@
 <script setup lang="ts">
 import type { Npc } from '~/types/cast'
+import type { GeneratedNpcImage } from '~/utils/leonardoImageGenerator'
 
 const props = defineProps<{ npc?: Npc | null }>()
 const open = defineModel<boolean>('open', { default: false })
 
 const { addNpc, updateNpc } = useNpcsStore()
 
-const form = reactive({ name: '', image: '', description: '' })
+const SPECIES_OPTIONS = ['Dragonborn', 'Dwarf', 'Elf', 'Gnome', 'Goblin', 'Half-Elf', 'Half-Orc', 'Halfling', 'Human', 'Orc', 'Tiefling']
+const AGE_OPTIONS = ['Child', 'Teenager', 'Young adult', 'Adult', 'Middle-aged', 'Elderly']
+
+const form = reactive({
+  name: '',
+  image: '',
+  leonardoImageId: undefined as string | undefined,
+  species: '',
+  gender: '',
+  age: '',
+  role: '',
+  description: ''
+})
 
 watch(open, (isOpen) => {
   if (!isOpen) {
@@ -15,7 +28,13 @@ watch(open, (isOpen) => {
 
   form.name = props.npc?.name ?? ''
   form.image = props.npc?.image ?? ''
+  form.leonardoImageId = props.npc?.leonardoImageId
+  form.species = props.npc?.species ?? ''
+  form.gender = props.npc?.gender ?? ''
+  form.age = props.npc?.age ?? ''
+  form.role = props.npc?.role ?? ''
   form.description = props.npc?.description ?? ''
+  aiValidationAttempted.value = false
 })
 
 async function onImageFileChange(file: File | null | undefined): Promise<void> {
@@ -24,10 +43,20 @@ async function onImageFileChange(file: File | null | undefined): Promise<void> {
   }
 
   form.image = await convertImageFileToWebp(file)
+  form.leonardoImageId = undefined
 }
 
 function save(): void {
-  const input = { name: form.name.trim(), image: form.image.trim(), description: form.description.trim() }
+  const input = {
+    name: form.name.trim(),
+    image: form.image.trim(),
+    leonardoImageId: form.leonardoImageId,
+    species: form.species,
+    gender: form.gender.trim(),
+    age: form.age,
+    role: form.role.trim(),
+    description: form.description.trim()
+  }
 
   if (!input.name) {
     return
@@ -43,9 +72,21 @@ function save(): void {
 }
 
 const aiGeneratorOpen = ref(false)
+const aiFieldsComplete = computed(() => Boolean(form.species && form.gender.trim() && form.age && form.role.trim()))
+const aiValidationAttempted = ref(false)
 
-function onAiImageAccepted(image: string): void {
-  form.image = image
+function openAiGenerator(): void {
+  if (!aiFieldsComplete.value) {
+    aiValidationAttempted.value = true
+    return
+  }
+
+  aiGeneratorOpen.value = true
+}
+
+function onAiImageAccepted(generated: GeneratedNpcImage): void {
+  form.image = generated.image
+  form.leonardoImageId = generated.leonardoImageId
   save()
 }
 </script>
@@ -64,6 +105,54 @@ function onAiImageAccepted(image: string): void {
             placeholder="NPC name"
           />
         </UFormField>
+
+        <div class="grid grid-cols-2 gap-4">
+          <UFormField
+            label="Species"
+            :error="aiValidationAttempted && !form.species ? 'Required to generate with AI' : undefined"
+          >
+            <USelect
+              v-model="form.species"
+              :items="SPECIES_OPTIONS"
+              class="w-full"
+              placeholder="Select species"
+            />
+          </UFormField>
+
+          <UFormField
+            label="Gender"
+            :error="aiValidationAttempted && !form.gender.trim() ? 'Required to generate with AI' : undefined"
+          >
+            <UInput
+              v-model="form.gender"
+              class="w-full"
+              placeholder="e.g. female"
+            />
+          </UFormField>
+
+          <UFormField
+            label="Age"
+            :error="aiValidationAttempted && !form.age ? 'Required to generate with AI' : undefined"
+          >
+            <USelect
+              v-model="form.age"
+              :items="AGE_OPTIONS"
+              class="w-full"
+              placeholder="Select age"
+            />
+          </UFormField>
+
+          <UFormField
+            label="Occupation / role"
+            :error="aiValidationAttempted && !form.role.trim() ? 'Required to generate with AI' : undefined"
+          >
+            <UInput
+              v-model="form.role"
+              class="w-full"
+              placeholder="e.g. blacksmith"
+            />
+          </UFormField>
+        </div>
 
         <UFormField
           label="Image"
@@ -85,7 +174,7 @@ function onAiImageAccepted(image: string): void {
               color="neutral"
               variant="subtle"
               icon="i-lucide-sparkles"
-              @click="aiGeneratorOpen = true"
+              @click="openAiGenerator"
             >
               Generate with AI
             </UButton>
@@ -120,6 +209,10 @@ function onAiImageAccepted(image: string): void {
 
   <AiImageGeneratorModal
     v-model:open="aiGeneratorOpen"
+    :species="form.species"
+    :gender="form.gender"
+    :age="form.age"
+    :role="form.role"
     @accept="onAiImageAccepted"
   />
 </template>

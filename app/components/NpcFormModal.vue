@@ -7,7 +7,7 @@ const open = defineModel<boolean>('open', { default: false })
 
 const { addNpc, updateNpc } = useNpcsStore()
 
-const SPECIES_OPTIONS = ['Dragonborn', 'Dwarf', 'Elf', 'Gnome', 'Goblin', 'Half-Elf', 'Half-Orc', 'Halfling', 'Human', 'Orc', 'Tiefling']
+const SPECIES_OPTIONS = ref(['Dragonborn', 'Dwarf', 'Elf', 'Gnome', 'Goblin', 'Half-Elf', 'Half-Orc', 'Halfling', 'Human', 'Orc', 'Tiefling'])
 const AGE_OPTIONS = ['Child', 'Teenager', 'Young adult', 'Adult', 'Middle-aged', 'Elderly']
 
 const form = reactive({
@@ -36,6 +36,12 @@ watch(open, (isOpen) => {
   form.description = props.npc?.description ?? ''
   aiValidationAttempted.value = false
 })
+
+function onSpeciesCreate(species: string): void {
+  SPECIES_OPTIONS.value.push(species)
+  SPECIES_OPTIONS.value.sort()
+  form.species = species
+}
 
 async function onImageFileChange(file: File | null | undefined): Promise<void> {
   if (!file) {
@@ -111,11 +117,13 @@ function onAiImageAccepted(generated: GeneratedNpcImage): void {
             label="Species"
             :error="aiValidationAttempted && !form.species ? 'Required to generate with AI' : undefined"
           >
-            <USelect
+            <UInputMenu
               v-model="form.species"
               :items="SPECIES_OPTIONS"
+              create-item
               class="w-full"
-              placeholder="Select species"
+              placeholder="e.g. Elf"
+              @create="onSpeciesCreate"
             />
           </UFormField>
 

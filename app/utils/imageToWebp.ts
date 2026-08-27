@@ -1,5 +1,5 @@
 export async function convertImageFileToWebp(
-  file: File,
+  file: File | Blob,
   { maxDimension = 1024, quality = 0.8 }: { maxDimension?: number, quality?: number } = {}
 ): Promise<string> {
   const objectUrl = URL.createObjectURL(file)

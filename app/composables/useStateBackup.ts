@@ -1,6 +1,7 @@
 import { strToU8, unzipSync, zipSync } from 'fflate'
 import type { Npc } from '~/types/cast'
 import { NPCS_KEY } from '~/stores/npcs'
+import { LEONARDO_API_KEY_STORAGE_KEY } from '~/composables/useLeonardoApiKey'
 
 const STORAGE_PREFIX = 'dm-presenter:'
 const IMAGES_DIR = 'images/'
@@ -95,7 +96,7 @@ export function useStateBackup() {
     }
 
     for (const key of Object.keys(window.localStorage)) {
-      if (key.startsWith(STORAGE_PREFIX)) {
+      if (key.startsWith(STORAGE_PREFIX) && key !== LEONARDO_API_KEY_STORAGE_KEY) {
         window.localStorage.removeItem(key)
       }
     }
@@ -116,7 +117,7 @@ function readPrefixedEntries(): Record<string, string> {
   for (let i = 0; i < window.localStorage.length; i++) {
     const key = window.localStorage.key(i)
 
-    if (key?.startsWith(STORAGE_PREFIX)) {
+    if (key?.startsWith(STORAGE_PREFIX) && key !== LEONARDO_API_KEY_STORAGE_KEY) {
       entries[key] = window.localStorage.getItem(key) ?? ''
     }
   }

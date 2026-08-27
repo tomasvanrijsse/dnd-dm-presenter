@@ -41,6 +41,13 @@ function save(): void {
 
   open.value = false
 }
+
+const aiGeneratorOpen = ref(false)
+
+function onAiImageAccepted(image: string): void {
+  form.image = image
+  save()
+}
 </script>
 
 <template>
@@ -60,7 +67,6 @@ function save(): void {
 
         <UFormField
           label="Image"
-          hint="Stored in your browser"
         >
           <div class="flex items-center gap-3">
             <img
@@ -75,6 +81,14 @@ function save(): void {
               class="flex-1"
               @update:model-value="onImageFileChange"
             />
+            <UButton
+              color="neutral"
+              variant="subtle"
+              icon="i-lucide-sparkles"
+              @click="aiGeneratorOpen = true"
+            >
+              Generate with AI
+            </UButton>
           </div>
         </UFormField>
 
@@ -103,4 +117,9 @@ function save(): void {
       </div>
     </template>
   </UModal>
+
+  <AiImageGeneratorModal
+    v-model:open="aiGeneratorOpen"
+    @accept="onAiImageAccepted"
+  />
 </template>

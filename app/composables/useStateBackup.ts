@@ -1,6 +1,5 @@
 import { strToU8, unzipSync, zipSync } from 'fflate'
-import type { Npc } from '~/types/cast'
-import { NPCS_KEY } from '~/stores/npcs'
+import { NPCS_KEY, isStoredNpcArray, type StoredNpc } from '~/stores/npcs'
 import { LEONARDO_API_KEY_STORAGE_KEY } from '~/composables/useLeonardoApiKey'
 
 const STORAGE_PREFIX = 'dm-presenter:'
@@ -76,7 +75,7 @@ export function useStateBackup() {
     if (npcsRaw) {
       const npcs: unknown = JSON.parse(npcsRaw)
 
-      if (isNpcArray(npcs)) {
+      if (isStoredNpcArray(npcs)) {
         const restored = npcs.map((npc) => {
           if (!npc.image.startsWith(IMAGES_DIR)) {
             return npc
@@ -125,7 +124,7 @@ function readPrefixedEntries(): Record<string, string> {
   return entries
 }
 
-function readNpcs(entries: Record<string, string>): Npc[] | null {
+function readNpcs(entries: Record<string, string>): StoredNpc[] | null {
   const raw = entries[NPCS_KEY]
 
   if (!raw) {
@@ -134,10 +133,10 @@ function readNpcs(entries: Record<string, string>): Npc[] | null {
 
   const parsed: unknown = JSON.parse(raw)
 
-  return isNpcArray(parsed) ? parsed : null
+  return isStoredNpcArray(parsed) ? parsed : null
 }
 
-function extractImage(npc: Npc): { bytes: Uint8Array, ext: string } | null {
+function extractImage(npc: StoredNpc): { bytes: Uint8Array, ext: string } | null {
   const match = /^data:image\/([a-z0-9+]+);base64,(.+)$/i.exec(npc.image)
 
   if (!match) {
@@ -183,14 +182,4 @@ function bytesToBase64(bytes: Uint8Array): string {
 function isStateData(value: unknown): value is Record<string, string> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
     && Object.entries(value).every(([key, entry]) => key.startsWith(STORAGE_PREFIX) && typeof entry === 'string')
-}
-
-function isNpcArray(value: unknown): value is Npc[] {
-  return Array.isArray(value) && value.every(entry =>
-    typeof entry === 'object' && entry !== null
-    && typeof (entry as Npc).id === 'string'
-    && typeof (entry as Npc).name === 'string'
-    && typeof (entry as Npc).image === 'string'
-    && typeof (entry as Npc).description === 'string'
-  )
 }

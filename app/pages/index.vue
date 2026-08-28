@@ -5,14 +5,10 @@ const npcsStore = useNpcsStore()
 const { npcs } = storeToRefs(npcsStore)
 const {
   removeNpc,
-  isAway,
-  toggleAway,
+  isFlagSet,
+  toggleFlag,
   allAway,
-  toggleAwayForAll,
-  isIntroduced,
-  toggleIntroduced,
-  isSeen,
-  toggleSeen
+  toggleAwayForAll
 } = npcsStore
 
 const playersStore = usePlayersStore()
@@ -207,7 +203,7 @@ function pointsClass(value: number): string {
             v-for="npc in npcs"
             :key="npc.id"
             class="border-b border-default last:border-b-0 hover:bg-elevated/30"
-            :class="isAway(npc.id) ? 'bg-elevated/20' : ''"
+            :class="isFlagSet(npc.id, 'away') ? 'bg-elevated/20' : ''"
           >
             <th class="sticky left-0 z-10 bg-default px-4 py-2 text-left font-medium">
               <div class="flex items-center gap-3">
@@ -222,11 +218,11 @@ function pointsClass(value: number): string {
                     :alt="npc.name"
                     size="lg"
                     class="shrink-0"
-                    :class="isAway(npc.id) ? 'grayscale opacity-50' : ''"
+                    :class="isFlagSet(npc.id, 'away') ? 'grayscale opacity-50' : ''"
                   />
                   <span
                     class="truncate"
-                    :class="isAway(npc.id) ? 'text-dimmed line-through' : 'text-highlighted'"
+                    :class="isFlagSet(npc.id, 'away') ? 'text-dimmed line-through' : 'text-highlighted'"
                   >
                     {{ npc.name }}
                   </span>
@@ -236,32 +232,32 @@ function pointsClass(value: number): string {
                   <UTooltip :text="`Toggle whether ${npc.name}'s name is known`">
                     <UButton
                       :icon="'i-lucide-handshake'"
-                      :color="isIntroduced(npc.id) ? 'primary' : 'neutral'"
-                      :variant="isIntroduced(npc.id) ? 'solid' : 'ghost'"
+                      :color="isFlagSet(npc.id, 'introduced') ? 'primary' : 'neutral'"
+                      :variant="isFlagSet(npc.id, 'introduced') ? 'solid' : 'ghost'"
                       size="xs"
                       :aria-label="`Toggle whether ${npc.name}'s name is known`"
-                      @click="toggleIntroduced(npc.id)"
+                      @click="toggleFlag(npc.id, 'introduced')"
                     />
                   </UTooltip>
 
                   <UTooltip :text="`Toggle whether ${npc.name} has been seen`">
                     <UButton
                       :icon="'i-lucide-eye'"
-                      :color="isSeen(npc.id) ? 'primary' : 'neutral'"
-                      :variant="isSeen(npc.id) ? 'solid' : 'ghost'"
+                      :color="isFlagSet(npc.id, 'seen') ? 'primary' : 'neutral'"
+                      :variant="isFlagSet(npc.id, 'seen') ? 'solid' : 'ghost'"
                       size="xs"
                       :aria-label="`Toggle whether ${npc.name} has been seen`"
-                      @click="toggleSeen(npc.id)"
+                      @click="toggleFlag(npc.id, 'seen')"
                     />
                   </UTooltip>
 
                   <USwitch
-                    :model-value="!isAway(npc.id)"
-                    :label="isAway(npc.id) ? 'Away' : 'Present'"
+                    :model-value="!isFlagSet(npc.id, 'away')"
+                    :label="isFlagSet(npc.id, 'away') ? 'Away' : 'Present'"
                     :ui="{ label: 'w-16' }"
                     size="sm"
                     :aria-label="`Toggle whether ${npc.name} is present`"
-                    @update:model-value="toggleAway(npc.id)"
+                    @update:model-value="toggleFlag(npc.id, 'away')"
                   />
                 </div>
               </div>

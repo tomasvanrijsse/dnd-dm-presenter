@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const npcsStore = useNpcsStore()
 const { npcs } = storeToRefs(npcsStore)
-const { isAway, isIntroduced, isSeen } = npcsStore
+const { isFlagSet } = npcsStore
 
 const itemsStore = useItemsStore()
 const { items } = storeToRefs(itemsStore)
@@ -15,7 +15,7 @@ const { isDisplayed } = displayStore
 
 const { hydrated } = storeToRefs(useHydrationStore())
 
-const presentNpcs = computed(() => hydrated.value ? npcs.value.filter(npc => !isAway(npc.id)) : [])
+const presentNpcs = computed(() => hydrated.value ? npcs.value.filter(npc => !isFlagSet(npc.id, 'away')) : [])
 const displayedItems = computed(() => items.value.filter(entry => isDisplayed('item', entry.id)))
 const displayedLocations = computed(() => locations.value.filter(entry => isDisplayed('location', entry.id)))
 
@@ -68,11 +68,11 @@ useHead({
             :src="npc.image"
             :alt="npc.name"
             class="block min-h-0 w-full flex-1 object-contain"
-            :class="isSeen(npc.id) ? '' : 'blur-xl'"
+            :class="isFlagSet(npc.id, 'seen') ? '' : 'blur-xl'"
           >
 
           <div
-            v-if="isIntroduced(npc.id)"
+            v-if="isFlagSet(npc.id, 'introduced')"
             class="tangerine-bold shrink-0 bg-white py-1 text-center text-5xl text-black"
           >
             {{ npc.name }}

@@ -2,7 +2,7 @@ import type { Npc } from '~/types/cast'
 
 export const NPCS_KEY = 'dm-presenter:npcs'
 
-type NpcFlag = 'away' | 'introduced' | 'seen'
+export type NpcFlag = 'away' | 'introduced' | 'seen'
 
 export const useNpcsStore = defineStore('npcs', () => {
   const npcs = ref<Npc[]>([])
@@ -27,16 +27,8 @@ export const useNpcsStore = defineStore('npcs', () => {
     updateNpc(id, { [flag]: !isFlagSet(id, flag) })
   }
 
-  function isAway(id: string): boolean {
-    return isFlagSet(id, 'away')
-  }
-
-  function toggleAway(id: string): void {
-    toggleFlag(id, 'away')
-  }
-
   function allAway(ids: string[]): boolean {
-    return ids.length > 0 && ids.every(isAway)
+    return ids.length > 0 && ids.every(id => isFlagSet(id, 'away'))
   }
 
   function toggleAwayForAll(ids: string[]): void {
@@ -45,35 +37,15 @@ export const useNpcsStore = defineStore('npcs', () => {
     npcs.value = npcs.value.map(npc => ids.includes(npc.id) ? { ...npc, away: value } : npc)
   }
 
-  function isIntroduced(id: string): boolean {
-    return isFlagSet(id, 'introduced')
-  }
-
-  function toggleIntroduced(id: string): void {
-    toggleFlag(id, 'introduced')
-  }
-
-  function isSeen(id: string): boolean {
-    return isFlagSet(id, 'seen')
-  }
-
-  function toggleSeen(id: string): void {
-    toggleFlag(id, 'seen')
-  }
-
   return {
     npcs,
     addNpc,
     updateNpc,
     removeNpc,
-    isAway,
-    toggleAway,
+    isFlagSet,
+    toggleFlag,
     allAway,
-    toggleAwayForAll,
-    isIntroduced,
-    toggleIntroduced,
-    isSeen,
-    toggleSeen
+    toggleAwayForAll
   }
 }, {
   persist: {
@@ -93,9 +65,9 @@ export const useNpcsStore = defineStore('npcs', () => {
   }
 })
 
-type StoredNpc = Omit<Npc, 'away' | 'introduced' | 'seen'> & Partial<Pick<Npc, 'away' | 'introduced' | 'seen'>>
+export type StoredNpc = Omit<Npc, 'away' | 'introduced' | 'seen'> & Partial<Pick<Npc, 'away' | 'introduced' | 'seen'>>
 
-function isStoredNpcArray(value: unknown): value is StoredNpc[] {
+export function isStoredNpcArray(value: unknown): value is StoredNpc[] {
   return Array.isArray(value) && value.every(entry =>
     isRecord(entry)
     && typeof entry.id === 'string'

@@ -58,6 +58,7 @@ onBeforeUnmount(() => {
         >
           {{ formatBytes(usedBytes) }} / {{ formatBytes(limitBytes) }}
         </span>
+        <UColorModeButton />
         <UButton
           icon="i-lucide-save"
           color="neutral"

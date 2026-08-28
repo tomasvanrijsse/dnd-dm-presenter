@@ -2,9 +2,13 @@ const API_BASE_V1 = 'https://cloud.leonardo.ai/api/rest/v1'
 const API_BASE_V2 = 'https://cloud.leonardo.ai/api/rest/v2'
 const POLL_INTERVAL_MS = 2000
 const POLL_TIMEOUT_MS = 90000
-const LOOKS_LIKE_REFERENCE_STRENGTH = 'MID'
+const MIMIC_IMAGE_STYLE_REFERENCE_STRENGTH = 'MID'
 const GENERATION_SIZE = 1024
 const MODEL = 'flux-pro-2.0'
+
+export type LeonardoImageReference
+  = | { type: 'GENERATED', id: string }
+    | { type: 'BASE64', dataUri: string }
 
 export interface NpcImagePrompt {
   species: string
@@ -12,7 +16,7 @@ export interface NpcImagePrompt {
   age: string
   role: string
   description: string
-  looksLikeGeneratedImageId?: string
+  mimicImageStyleReference?: LeonardoImageReference
 }
 
 export interface GeneratedNpcImage {
@@ -22,7 +26,7 @@ export interface GeneratedNpcImage {
 
 export async function generateLeonardoNpcImage(apiKey: string, promptInput: NpcImagePrompt): Promise<GeneratedNpcImage> {
   const prompt = buildPrompt(promptInput)
-  const generationId = await startGeneration(apiKey, prompt, promptInput.looksLikeGeneratedImageId ?? null)
+  const generationId = await startGeneration(apiKey, prompt, promptInput.mimicImageStyleReference ?? null)
   const generatedImage = await pollForGeneratedImage(apiKey, generationId)
   const imageResponse = await fetch(generatedImage.url)
 
@@ -47,7 +51,7 @@ function authHeaders(apiKey: string): Record<string, string> {
 async function startGeneration(
   apiKey: string,
   prompt: string,
-  looksLikeGeneratedImageId: string | null
+  mimicImageStyleReference: LeonardoImageReference | null
 ): Promise<string> {
   const parameters: Record<string, unknown> = {
     prompt,
@@ -57,12 +61,13 @@ async function startGeneration(
     prompt_enhance: 'OFF'
   }
 
-  if (looksLikeGeneratedImageId) {
+  if (mimicImageStyleReference) {
+    const image = mimicImageStyleReference.type === 'BASE64'
+      ? { url: mimicImageStyleReference.dataUri, type: 'BASE64' }
+      : { id: mimicImageStyleReference.id, type: mimicImageStyleReference.type }
+
     parameters.guidances = {
-      image_reference: [{
-        image: { id: looksLikeGeneratedImageId, type: 'GENERATED' },
-        strength: LOOKS_LIKE_REFERENCE_STRENGTH
-      }]
+      image_reference: [{ image, strength: MIMIC_IMAGE_STYLE_REFERENCE_STRENGTH }]
     }
   }
 

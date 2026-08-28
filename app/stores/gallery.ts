@@ -14,7 +14,11 @@ export const useItemsStore = defineStore('items', () => {
     items.value = items.value.filter(entry => entry.id !== id)
   }
 
-  return { items, addItem, removeItem }
+  function reorderItems(orderedIds: string[]): void {
+    items.value = reorderById(items.value, orderedIds)
+  }
+
+  return { items, addItem, removeItem, reorderItems }
 }, {
   persist: { key: ITEMS_KEY, ...fieldPersistence('items', isGalleryImageArray, () => []) }
 })
@@ -30,7 +34,11 @@ export const useLocationsStore = defineStore('locations', () => {
     locations.value = locations.value.filter(entry => entry.id !== id)
   }
 
-  return { locations, addLocation, removeLocation }
+  function reorderLocations(orderedIds: string[]): void {
+    locations.value = reorderById(locations.value, orderedIds)
+  }
+
+  return { locations, addLocation, removeLocation, reorderLocations }
 }, {
   persist: { key: LOCATIONS_KEY, ...fieldPersistence('locations', isGalleryImageArray, () => []) }
 })

@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { useSortable } from '@vueuse/integrations/useSortable'
 import type { DisplayedKind } from '~/stores/display'
 import type { GalleryImage } from '~/types/cast'
 
-defineProps<{
+const props = defineProps<{
   title: string
   addLabel: string
   kind: DisplayedKind
@@ -12,12 +13,31 @@ defineProps<{
 const emit = defineEmits<{
   add: [file: File]
   remove: [id: string]
+  reorder: [orderedIds: string[]]
 }>()
 
 const displayStore = useDisplayStore()
 const { mode } = storeToRefs(displayStore)
 const { isDisplayed, toggleDisplay, setMode } = displayStore
 const { hydrated } = storeToRefs(useHydrationStore())
+
+const sortableImages = ref<GalleryImage[]>([...props.images])
+
+watch(() => props.images, (value) => {
+  sortableImages.value = [...value]
+})
+
+const gridEl = ref<HTMLElement | null>(null)
+
+useSortable(gridEl, sortableImages, {
+  handle: '.drag-handle',
+  animation: 150,
+  watchElement: true,
+  onEnd: async () => {
+    await nextTick()
+    emit('reorder', sortableImages.value.map(entry => entry.id))
+  }
+})
 
 const fileInput = ref<HTMLInputElement | null>(null)
 
@@ -94,10 +114,11 @@ function confirmRemove(): void {
 
       <div
         v-else
+        ref="gridEl"
         class="grid grid-cols-2 gap-4 p-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
       >
         <div
-          v-for="entry in images"
+          v-for="entry in sortableImages"
           :key="entry.id"
           class="group relative aspect-square overflow-hidden rounded-lg ring ring-default"
         >
@@ -126,6 +147,16 @@ function confirmRemove(): void {
             :aria-label="`Delete ${title.toLowerCase()} image`"
             @click="deleteTarget = entry"
           />
+
+          <div
+            class="drag-handle absolute bottom-1 right-1 cursor-grab rounded bg-black/50 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
+            :aria-label="`Drag to reorder ${title.toLowerCase()}`"
+          >
+            <UIcon
+              name="i-lucide-grip-vertical"
+              class="size-4"
+            />
+          </div>
         </div>
       </div>
     </div>

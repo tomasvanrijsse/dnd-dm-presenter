@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useSortable } from '@vueuse/integrations/useSortable'
 import type { Npc } from '~/types/cast'
 
 const npcsStore = useNpcsStore()
@@ -16,11 +17,19 @@ const { players } = storeToRefs(playersStore)
 
 const itemsStore = useItemsStore()
 const { items } = storeToRefs(itemsStore)
-const { addItem, removeItem } = itemsStore
+const { addItem, removeItem, reorderItems } = itemsStore
 
 const locationsStore = useLocationsStore()
 const { locations } = storeToRefs(locationsStore)
-const { addLocation, removeLocation } = locationsStore
+const { addLocation, removeLocation, reorderLocations } = locationsStore
+
+const npcsTableBody = ref<HTMLElement | null>(null)
+
+useSortable(npcsTableBody, npcs, {
+  handle: '.drag-handle',
+  animation: 150,
+  watchElement: true
+})
 
 const displayStore = useDisplayStore()
 const { mode } = storeToRefs(displayStore)
@@ -201,7 +210,7 @@ function pointsClass(value: number): string {
           </tr>
         </thead>
 
-        <tbody>
+        <tbody ref="npcsTableBody">
           <tr
             v-for="npc in npcs"
             :key="npc.id"
@@ -210,6 +219,16 @@ function pointsClass(value: number): string {
           >
             <th class="sticky left-0 z-10 bg-default px-4 py-2 text-left font-medium">
               <div class="flex items-center gap-3">
+                <div
+                  class="drag-handle shrink-0 cursor-grab text-dimmed hover:text-highlighted active:cursor-grabbing"
+                  :aria-label="`Drag to reorder ${npc.name}`"
+                >
+                  <UIcon
+                    name="i-lucide-grip-vertical"
+                    class="size-4"
+                  />
+                </div>
+
                 <button
                   type="button"
                   class="flex min-w-0 items-center gap-3 rounded hover:opacity-75"
@@ -309,6 +328,7 @@ function pointsClass(value: number): string {
         :images="items"
         @add="onAddItem"
         @remove="removeItem"
+        @reorder="reorderItems"
       />
 
       <GalleryGrid
@@ -318,6 +338,7 @@ function pointsClass(value: number): string {
         :images="locations"
         @add="onAddLocation"
         @remove="removeLocation"
+        @reorder="reorderLocations"
       />
     </div>
 

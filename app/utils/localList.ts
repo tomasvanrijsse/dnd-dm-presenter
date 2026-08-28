@@ -31,6 +31,12 @@ export function slugify(name: string): string {
     .replace(/^-+|-+$/g, '') || 'entry'
 }
 
+export function reorderById<T extends { id: string }>(items: T[], orderedIds: string[]): T[] {
+  const byId = new Map(items.map(item => [item.id, item]))
+
+  return orderedIds.map(id => byId.get(id)).filter((item): item is T => item !== undefined)
+}
+
 export function uniqueId(name: string, existing: { id: string }[]): string {
   const base = slugify(name)
   const existingIds = new Set(existing.map(entry => entry.id))

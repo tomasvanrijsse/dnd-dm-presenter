@@ -10,24 +10,34 @@ const locationsStore = useLocationsStore()
 const { locations } = storeToRefs(locationsStore)
 
 const displayStore = useDisplayStore()
-const { displayed } = storeToRefs(displayStore)
+const { mode } = storeToRefs(displayStore)
+const { isDisplayed } = displayStore
 
 const { hydrated } = storeToRefs(useHydrationStore())
 
-const displayedImage = computed(() => {
-  if (!displayed.value) {
-    return null
+const presentNpcs = computed(() => hydrated.value ? npcs.value.filter(npc => !isAway(npc.id)) : [])
+const displayedItems = computed(() => items.value.filter(entry => isDisplayed('item', entry.id)))
+const displayedLocations = computed(() => locations.value.filter(entry => isDisplayed('location', entry.id)))
+
+const activeEntries = computed(() => {
+  if (mode.value === 'item') {
+    return displayedItems.value
   }
 
-  const list = displayed.value.kind === 'item' ? items.value : locations.value
+  if (mode.value === 'location') {
+    return displayedLocations.value
+  }
 
-  return list.find(entry => entry.id === displayed.value?.id)?.image ?? null
+  return presentNpcs.value
 })
 
-const presentNpcs = computed(() => hydrated.value ? npcs.value.filter(npc => !isAway(npc.id)) : [])
+const columns = computed(() => Math.max(1, Math.ceil(Math.sqrt(activeEntries.value.length))))
+const rows = computed(() => Math.max(1, Math.ceil(activeEntries.value.length / columns.value)))
 
-const columns = computed(() => Math.max(1, Math.ceil(Math.sqrt(presentNpcs.value.length))))
-const rows = computed(() => Math.max(1, Math.ceil(presentNpcs.value.length / columns.value)))
+const gridStyle = computed(() => ({
+  gridTemplateColumns: `repeat(${columns.value}, 1fr)`,
+  gridTemplateRows: `repeat(${rows.value}, 1fr)`
+}))
 
 useHead({
   title: 'NPC Display',
@@ -43,52 +53,67 @@ useHead({
 
 <template>
   <div class="fixed inset-0 overflow-hidden bg-white mb-8">
-    <div
-      v-if="displayedImage"
-      class="flex h-full w-full items-center justify-center bg-black"
-    >
-      <img
-        :src="displayedImage"
-        alt=""
-        class="max-h-full max-w-full object-contain"
-      >
-    </div>
-
-    <div
-      v-else-if="presentNpcs.length"
-      class="grid h-full w-full overflow-hidden"
-      :style="{
-        gridTemplateColumns: `repeat(${columns}, 1fr)`,
-        gridTemplateRows: `repeat(${rows}, 1fr)`
-      }"
-    >
+    <template v-if="mode === 'npc'">
       <div
-        v-for="npc in presentNpcs"
-        :key="npc.id"
-        class="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden"
+        v-if="presentNpcs.length"
+        class="grid h-full w-full overflow-hidden"
+        :style="gridStyle"
       >
-        <img
-          :src="npc.image"
-          :alt="npc.name"
-          class="block min-h-0 w-full flex-1 object-contain"
-          :class="isSeen(npc.id) ? '' : 'blur-xl'"
-        >
-
         <div
-          v-if="isIntroduced(npc.id)"
-          class="tangerine-bold shrink-0 bg-white py-1 text-center text-5xl text-black"
+          v-for="npc in presentNpcs"
+          :key="npc.id"
+          class="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden"
         >
-          {{ npc.name }}
+          <img
+            :src="npc.image"
+            :alt="npc.name"
+            class="block min-h-0 w-full flex-1 object-contain"
+            :class="isSeen(npc.id) ? '' : 'blur-xl'"
+          >
+
+          <div
+            v-if="isIntroduced(npc.id)"
+            class="tangerine-bold shrink-0 bg-white py-1 text-center text-5xl text-black"
+          >
+            {{ npc.name }}
+          </div>
         </div>
       </div>
-    </div>
 
-    <div
-      v-else-if="hydrated"
-      class="flex h-full w-full items-center justify-center text-black/40 text-2xl"
-    >
-      No NPCs present
-    </div>
+      <div
+        v-else-if="hydrated"
+        class="flex h-full w-full items-center justify-center text-black/40 text-2xl"
+      >
+        No NPCs present
+      </div>
+    </template>
+
+    <template v-else>
+      <div
+        v-if="activeEntries.length"
+        class="grid h-full w-full overflow-hidden bg-black"
+        :style="gridStyle"
+      >
+        <div
+          v-for="entry in activeEntries"
+          :key="entry.id"
+          class="flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden"
+        >
+          <img
+            :src="entry.image"
+            alt=""
+            class="max-h-full max-w-full object-contain"
+          >
+        </div>
+      </div>
+
+      <div
+        v-else-if="hydrated"
+        class="flex h-full w-full items-center justify-center bg-black text-white/40 text-2xl"
+      >
+        No {{ mode === 'item' ? 'items' : 'locations' }} displayed
+      </div>
+    </template>
   </div>
 </template>
 

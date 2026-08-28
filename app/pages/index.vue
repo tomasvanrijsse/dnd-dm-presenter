@@ -27,18 +27,8 @@ const { locations } = storeToRefs(locationsStore)
 const { addLocation, removeLocation } = locationsStore
 
 const displayStore = useDisplayStore()
-const { displayed } = storeToRefs(displayStore)
-const { clearDisplay } = displayStore
-
-const displayedImage = computed(() => {
-  if (!displayed.value) {
-    return null
-  }
-
-  const list = displayed.value.kind === 'item' ? items.value : locations.value
-
-  return list.find(entry => entry.id === displayed.value?.id)?.image ?? null
-})
+const { mode } = storeToRefs(displayStore)
+const { setMode } = displayStore
 
 const pointsStore = usePointsStore()
 const { pointsFor, adjust, reset } = pointsStore
@@ -112,9 +102,20 @@ function pointsClass(value: number): string {
   <UContainer class="py-8">
     <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-highlighted">
-          NPCs & player points
-        </h1>
+        <div class="flex items-center gap-3">
+          <h1 class="text-2xl font-bold text-highlighted">
+            NPCs & player points
+          </h1>
+          <UButton
+            :color="mode === 'npc' ? 'error' : 'neutral'"
+            :variant="mode === 'npc' ? 'solid' : 'subtle'"
+            icon="i-lucide-monitor"
+            size="xs"
+            @click="setMode('npc')"
+          >
+            Live presenting
+          </UButton>
+        </div>
         <p class="text-sm text-muted">
           Show the name and/or image of the NPC to the players. And track the points each NPC holds for each player.
         </p>
@@ -131,11 +132,11 @@ function pointsClass(value: number): string {
         </UButton>
 
         <UButton
+          v-if="players.length > 0"
           color="neutral"
           variant="subtle"
           icon="i-lucide-rotate-ccw"
           @click="resetOpen = true"
-          v-if="players.length > 0"
         >
           Reset points
         </UButton>
@@ -379,22 +380,6 @@ function pointsClass(value: number): string {
             Remove
           </UButton>
         </div>
-      </template>
-    </UModal>
-
-    <UModal
-      :open="displayedImage !== null"
-      :title="displayed?.kind === 'item' ? 'Displaying item' : 'Displaying location'"
-      :ui="{ content: 'sm:max-w-2xl' }"
-      @update:open="value => { if (!value) clearDisplay() }"
-    >
-      <template #body>
-        <img
-          v-if="displayedImage"
-          :src="displayedImage"
-          alt=""
-          class="max-h-[70vh] w-full rounded object-contain"
-        >
       </template>
     </UModal>
   </UContainer>

@@ -14,7 +14,9 @@ const emit = defineEmits<{
   remove: [id: string]
 }>()
 
-const { isDisplayed, toggleDisplay } = useDisplayStore()
+const displayStore = useDisplayStore()
+const { mode } = storeToRefs(displayStore)
+const { isDisplayed, toggleDisplay, setMode } = displayStore
 const { hydrated } = storeToRefs(useHydrationStore())
 
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -44,9 +46,20 @@ function confirmRemove(): void {
 <template>
   <section>
     <div class="mb-3 flex items-center justify-between">
-      <h2 class="text-lg font-semibold text-highlighted">
-        {{ title }}
-      </h2>
+      <div class="flex items-center gap-3">
+        <h2 class="text-lg font-semibold text-highlighted">
+          {{ title }}
+        </h2>
+        <UButton
+          :color="mode === kind ? 'error' : 'neutral'"
+          :variant="mode === kind ? 'solid' : 'subtle'"
+          icon="i-lucide-monitor"
+          size="xs"
+          @click="setMode(kind)"
+        >
+          Live presenting
+        </UButton>
+      </div>
       <UButton
         icon="i-lucide-plus"
         color="neutral"
@@ -94,18 +107,15 @@ function confirmRemove(): void {
             class="h-full w-full object-cover"
           >
 
-          <div
-            class="cursor-pointer absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100"
-            @click="toggleDisplay(kind, entry.id)"
-          >
-            <UButton
-              icon="i-lucide-monitor"
-              :color="isDisplayed(kind, entry.id) ? 'primary' : 'neutral'"
-              :variant="isDisplayed(kind, entry.id) ? 'solid' : 'subtle'"
-            >
-              {{ isDisplayed(kind, entry.id) ? 'Hide' : 'Display' }}
-            </UButton>
-          </div>
+          <USwitch
+            :model-value="isDisplayed(kind, entry.id)"
+            :label="isDisplayed(kind, entry.id) ? 'Shown' : 'Hidden'"
+            :ui="{ label: 'w-14 text-white' }"
+            size="sm"
+            class="absolute left-1 top-1 rounded bg-black/50 px-1.5 py-1"
+            :aria-label="`Toggle whether this ${title.toLowerCase().replace(/s$/, '')} is displayed`"
+            @update:model-value="toggleDisplay(kind, entry.id)"
+          />
 
           <UButton
             icon="i-lucide-trash-2"

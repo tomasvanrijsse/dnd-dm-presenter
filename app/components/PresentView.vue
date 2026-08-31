@@ -88,7 +88,7 @@ useHead({
     <template v-else>
       <div
         v-if="activeEntries.length"
-        class="grid h-full w-full overflow-hidden bg-black"
+        class="grid h-full w-full overflow-hidden bg-white"
         :style="gridStyle"
       >
         <div
@@ -106,7 +106,7 @@ useHead({
 
       <div
         v-else-if="hydrated"
-        class="flex h-full w-full items-center justify-center bg-black text-[3cqw] text-white/40"
+        class="flex h-full w-full items-center justify-center bg-white text-[3cqw] text-white/40"
       >
         No {{ mode === 'item' ? 'items' : 'locations' }} displayed
       </div>

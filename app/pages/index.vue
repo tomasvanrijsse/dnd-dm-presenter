@@ -111,9 +111,9 @@ function pointsClass(value: number): string {
     <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
       <div>
         <div class="flex items-center gap-3">
-          <h1 class="text-2xl font-bold text-highlighted">
-            NPCs & player points
-          </h1>
+          <h2 class="text-lg font-semibold text-highlighted">
+            NPCs
+          </h2>
           <UButton
             :color="mode === 'npc' ? 'error' : 'neutral'"
             :variant="mode === 'npc' ? 'solid' : 'subtle'"

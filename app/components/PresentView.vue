@@ -31,7 +31,11 @@ const activeEntries = computed(() => {
   return presentNpcs.value
 })
 
-const columns = computed(() => Math.max(1, Math.ceil(Math.sqrt(activeEntries.value.length))))
+const columns = computed(() => {
+  const count = activeEntries.value.length
+  if (count === 3) return 3
+  return Math.max(1, Math.ceil(Math.sqrt(count)))
+})
 const rows = computed(() => Math.max(1, Math.ceil(activeEntries.value.length / columns.value)))
 
 const gridStyle = computed(() => ({

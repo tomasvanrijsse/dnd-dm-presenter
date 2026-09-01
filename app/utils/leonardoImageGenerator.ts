@@ -39,9 +39,31 @@ export async function generateLeonardoNpcImage(apiKey: string, promptInput: NpcI
 
 function buildPrompt({ species, gender, age, role, description }: NpcImagePrompt): string {
   const subject = [age, gender, role].map(part => part.trim()).filter(Boolean).join(' ')
-  const base = `Portrait of a ${subject || 'fantasy character'}, ${species} species, D&D character art, torso, isolated image, white background, detailed`
+  const base = `Portrait of a ${subject || 'fantasy character'} of ${species} species.` +
+    `Style:
+    Highly detailed hand-inked fantasy character illustration,
+    semi-realistic fantasy concept art, traditional pen-and-ink linework,
+    strong clean black contour lines with varied line weight,
+    fine hatching and cross-hatching throughout the shadows,
+    intricate hand-drawn details,
+    subtle cel shading combined with soft painterly color transitions,
+    muted warm earthy color palette, burgundy, dark brown, ivory,
+    aged gold and bronze metallic accents,
+    rich material textures for leather, cloth and metal,
+    sharp expressive facial features,
+    realistic anatomy with slightly stylized fantasy proportions,
+    highly detailed medieval fantasy costume,
+    dramatic but controlled lighting,
+    crisp illustrated edges,
+    visible pen texture,
+    professional tabletop RPG character concept art,
+    full upper-body portrait,
+    front-facing or three-quarter pose,
+    centered composition,
+    isolated on a clean white background,
+    no scenery, no frame, no text.`
 
-  return description.trim() ? `${base}. ${description.trim()}` : base
+  return description.trim() ? `${base}. Character description: ${description.trim()}` : base
 }
 
 function authHeaders(apiKey: string): Record<string, string> {

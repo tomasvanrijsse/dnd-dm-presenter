@@ -16,6 +16,7 @@ const emit = defineEmits<{
 const wrapperEl = ref<HTMLElement | null>(null)
 const canvasEl = ref<HTMLCanvasElement | null>(null)
 const aspectRatio = ref(1)
+const displaySize = ref({ width: 0, height: 0 })
 const dragStart = ref<{ x: number, y: number } | null>(null)
 const dragCurrent = ref<{ x: number, y: number } | null>(null)
 
@@ -23,6 +24,7 @@ watch(() => props.image, (src) => {
   const img = new Image()
   img.onload = () => {
     aspectRatio.value = img.naturalWidth / img.naturalHeight || 1
+    resizeCanvas()
   }
   img.src = src
 }, { immediate: true })
@@ -64,13 +66,24 @@ function draw(): void {
 
 function resizeCanvas(): void {
   const canvas = canvasEl.value
-  const wrapper = wrapperEl.value
-  if (!canvas || !wrapper) {
+  const container = wrapperEl.value?.parentElement
+  if (!canvas || !container) {
     return
   }
 
-  canvas.width = wrapper.clientWidth
-  canvas.height = wrapper.clientHeight
+  const containerWidth = container.clientWidth
+  const containerHeight = container.clientHeight
+  if (!containerWidth || !containerHeight) {
+    return
+  }
+
+  const containerRatio = containerWidth / containerHeight
+  displaySize.value = aspectRatio.value > containerRatio
+    ? { width: containerWidth, height: containerWidth / aspectRatio.value }
+    : { width: containerHeight * aspectRatio.value, height: containerHeight }
+
+  canvas.width = displaySize.value.width
+  canvas.height = displaySize.value.height
   draw()
 }
 
@@ -80,8 +93,8 @@ let resizeObserver: ResizeObserver | null = null
 
 onMounted(() => {
   resizeObserver = new ResizeObserver(resizeCanvas)
-  if (wrapperEl.value) {
-    resizeObserver.observe(wrapperEl.value)
+  if (wrapperEl.value?.parentElement) {
+    resizeObserver.observe(wrapperEl.value.parentElement)
   }
   resizeCanvas()
 })
@@ -151,7 +164,7 @@ function onPointerUp(): void {
   <div
     ref="wrapperEl"
     class="relative"
-    :style="{ aspectRatio, maxHeight: '100%', maxWidth: '100%' }"
+    :style="{ width: `${displaySize.width}px`, height: `${displaySize.height}px` }"
   >
     <img
       :src="image"

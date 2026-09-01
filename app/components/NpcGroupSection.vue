@@ -142,12 +142,13 @@ function pointsClass(value: number): string {
               />
             </UTooltip>
 
-            <UTooltip :text="`Toggle whether ${npc.name} has been seen`">
+            <UTooltip :text="npc.image ? `Toggle whether ${npc.name} has been seen` : `${npc.name} has no image yet`">
               <UButton
                 :icon="'i-lucide-eye'"
                 :color="isFlagSet(npc.id, 'seen') ? 'primary' : 'neutral'"
                 :variant="isFlagSet(npc.id, 'seen') ? 'solid' : 'ghost'"
                 size="xs"
+                :disabled="!npc.image"
                 :aria-label="`Toggle whether ${npc.name} has been seen`"
                 @click="toggleFlag(npc.id, 'seen')"
               />

@@ -88,7 +88,7 @@ useHead({
     <template v-else-if="mode === 'location'">
       <div
         v-if="activeLocation"
-        class="flex h-full w-full items-center justify-center bg-white"
+        class="flex h-full w-full items-center justify-center bg-black"
       >
         <LocationFogCanvas
           :image="activeLocation.image"

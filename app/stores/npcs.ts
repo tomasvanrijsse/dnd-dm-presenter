@@ -37,6 +37,21 @@ export const useNpcsStore = defineStore('npcs', () => {
     npcs.value = npcs.value.map(npc => ids.includes(npc.id) ? { ...npc, away: value } : npc)
   }
 
+  function reorderSubset(orderedIds: string[]): void {
+    const memberIds = new Set(orderedIds)
+    const firstIndex = npcs.value.findIndex(npc => memberIds.has(npc.id))
+
+    if (firstIndex === -1) {
+      return
+    }
+
+    const others = npcs.value.filter(npc => !memberIds.has(npc.id))
+    const insertAt = npcs.value.slice(0, firstIndex).filter(npc => !memberIds.has(npc.id)).length
+    const ordered = reorderById(npcs.value, orderedIds)
+
+    npcs.value = [...others.slice(0, insertAt), ...ordered, ...others.slice(insertAt)]
+  }
+
   return {
     npcs,
     addNpc,
@@ -45,7 +60,8 @@ export const useNpcsStore = defineStore('npcs', () => {
     isFlagSet,
     toggleFlag,
     allAway,
-    toggleAwayForAll
+    toggleAwayForAll,
+    reorderSubset
   }
 }, {
   persist: {

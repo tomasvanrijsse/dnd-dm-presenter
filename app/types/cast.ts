@@ -11,9 +11,15 @@ export interface Npc {
   away: boolean
   introduced: boolean
   seen: boolean
+  groupId?: string
 }
 
 export interface Player {
+  id: string
+  name: string
+}
+
+export interface NpcGroup {
   id: string
   name: string
 }

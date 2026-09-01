@@ -7,6 +7,13 @@ const open = defineModel<boolean>('open', { default: false })
 
 const { addNpc, updateNpc } = useNpcsStore()
 
+const { groups } = storeToRefs(useNpcGroupsStore())
+const NO_GROUP = '__none__'
+const groupOptions = computed(() => [
+  { label: 'No group', value: NO_GROUP },
+  ...groups.value.map(group => ({ label: group.name, value: group.id }))
+])
+
 const SPECIES_OPTIONS = ref(['Dragonborn', 'Dwarf', 'Elf', 'Gnome', 'Goblin', 'Half-Elf', 'Half-Orc', 'Halfling', 'Human', 'Orc', 'Tiefling'])
 const AGE_OPTIONS = ['Child', 'Teenager', 'Young adult', 'Adult', 'Middle-aged', 'Elderly']
 
@@ -18,7 +25,8 @@ const form = reactive({
   gender: '',
   age: '',
   role: '',
-  description: ''
+  description: '',
+  groupId: undefined as string | undefined
 })
 
 watch(open, (isOpen) => {
@@ -34,6 +42,7 @@ watch(open, (isOpen) => {
   form.age = props.npc?.age ?? ''
   form.role = props.npc?.role ?? ''
   form.description = props.npc?.description ?? ''
+  form.groupId = props.npc?.groupId ?? NO_GROUP
   aiValidationAttempted.value = false
 })
 
@@ -61,7 +70,8 @@ function save(): void {
     gender: form.gender.trim(),
     age: form.age,
     role: form.role.trim(),
-    description: form.description.trim()
+    description: form.description.trim(),
+    groupId: form.groupId === NO_GROUP ? undefined : form.groupId
   }
 
   if (!input.name) {
@@ -109,6 +119,19 @@ function onAiImageAccepted(generated: GeneratedNpcImage): void {
             v-model="form.name"
             class="w-full"
             placeholder="NPC name"
+          />
+        </UFormField>
+
+        <UFormField
+          v-if="groupOptions.length > 0"
+          label="Group"
+        >
+          <USelect
+            v-model="form.groupId"
+            :items="groupOptions"
+            value-key="value"
+            placeholder="No group"
+            class="w-full"
           />
         </UFormField>
 

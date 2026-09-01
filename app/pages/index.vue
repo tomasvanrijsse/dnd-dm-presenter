@@ -1,16 +1,81 @@
 <script setup lang="ts">
-import { useSortable } from '@vueuse/integrations/useSortable'
-import type { Npc } from '~/types/cast'
+import type { Npc, NpcGroup } from '~/types/cast'
 
 const npcsStore = useNpcsStore()
 const { npcs } = storeToRefs(npcsStore)
-const {
-  removeNpc,
-  isFlagSet,
-  toggleFlag,
-  allAway,
-  toggleAwayForAll
-} = npcsStore
+const { removeNpc, allAway, toggleAwayForAll } = npcsStore
+
+const npcGroupsStore = useNpcGroupsStore()
+const { groups } = storeToRefs(npcGroupsStore)
+const { addGroup, updateGroup, removeGroup, removeGroupWithNpcs } = npcGroupsStore
+
+const groupModalOpen = ref(false)
+const editingGroupId = ref<string | null>(null)
+const groupForm = reactive({ name: '' })
+
+const viewGroup = ref<NpcGroup | null>(null)
+
+const groupDeleteTarget = ref<NpcGroup | null>(null)
+const deleteGroupWithNpcs = ref(false)
+
+function openNewGroup(): void {
+  editingGroupId.value = null
+  groupForm.name = ''
+  groupModalOpen.value = true
+}
+
+function openEditGroup(group: NpcGroup): void {
+  viewGroup.value = null
+  nextTick(() => {
+    editingGroupId.value = group.id
+    groupForm.name = group.name
+    groupModalOpen.value = true
+  })
+}
+
+function saveGroup(): void {
+  const input = { name: groupForm.name.trim() }
+
+  if (!input.name) {
+    return
+  }
+
+  if (editingGroupId.value) {
+    updateGroup(editingGroupId.value, input)
+  } else {
+    addGroup(input)
+  }
+
+  groupModalOpen.value = false
+}
+
+function requestDeleteGroup(group: NpcGroup): void {
+  viewGroup.value = null
+  nextTick(() => {
+    deleteGroupWithNpcs.value = false
+    groupDeleteTarget.value = group
+  })
+}
+
+function requestDeleteGroupWithNpcs(group: NpcGroup): void {
+  viewGroup.value = null
+  nextTick(() => {
+    deleteGroupWithNpcs.value = true
+    groupDeleteTarget.value = group
+  })
+}
+
+function confirmRemoveGroup(): void {
+  if (groupDeleteTarget.value) {
+    if (deleteGroupWithNpcs.value) {
+      removeGroupWithNpcs(groupDeleteTarget.value.id)
+    } else {
+      removeGroup(groupDeleteTarget.value.id)
+    }
+  }
+
+  groupDeleteTarget.value = null
+}
 
 const playersStore = usePlayersStore()
 const { players } = storeToRefs(playersStore)
@@ -23,12 +88,14 @@ const locationsStore = useLocationsStore()
 const { locations } = storeToRefs(locationsStore)
 const { addLocation, removeLocation, reorderLocations } = locationsStore
 
-const npcsTableBody = ref<HTMLElement | null>(null)
+function npcsInGroup(groupId: string): Npc[] {
+  return npcs.value.filter(npc => npc.groupId === groupId)
+}
 
-useSortable(npcsTableBody, npcs, {
-  handle: '.drag-handle',
-  animation: 150,
-  watchElement: true
+const ungroupedNpcs = computed(() => {
+  const groupIds = new Set(groups.value.map(group => group.id))
+
+  return npcs.value.filter(npc => !npc.groupId || !groupIds.has(npc.groupId))
 })
 
 const displayStore = useDisplayStore()
@@ -36,7 +103,7 @@ const { mode } = storeToRefs(displayStore)
 const { setMode } = displayStore
 
 const pointsStore = usePointsStore()
-const { pointsFor, adjust, reset } = pointsStore
+const { reset } = pointsStore
 
 const { hydrated } = storeToRefs(useHydrationStore())
 
@@ -66,15 +133,19 @@ function openNewNpc(): void {
 
 function editNpcFromView(npc: Npc): void {
   infoNpc.value = null
-  editingNpc.value = npc
-  npcFormOpen.value = true
+  nextTick(() => {
+    editingNpc.value = npc
+    npcFormOpen.value = true
+  })
 }
 
 const npcDeleteTarget = ref<Npc | null>(null)
 
 function requestDeleteNpc(npc: Npc): void {
   infoNpc.value = null
-  npcDeleteTarget.value = npc
+  nextTick(() => {
+    npcDeleteTarget.value = npc
+  })
 }
 
 function confirmRemoveNpc(): void {
@@ -91,18 +162,6 @@ async function onAddItem(file: File): Promise<void> {
 
 async function onAddLocation(file: File): Promise<void> {
   addLocation(await convertImageFileToWebp(file))
-}
-
-function pointsClass(value: number): string {
-  if (value > 0) {
-    return 'text-primary'
-  }
-
-  if (value < 0) {
-    return 'text-error'
-  }
-
-  return 'text-dimmed'
 }
 </script>
 
@@ -137,6 +196,15 @@ function pointsClass(value: number): string {
           @click="openNewNpc"
         >
           Add NPC
+        </UButton>
+
+        <UButton
+          color="neutral"
+          variant="subtle"
+          icon="i-lucide-plus"
+          @click="openNewGroup"
+        >
+          Create group
         </UButton>
 
         <UButton
@@ -210,113 +278,36 @@ function pointsClass(value: number): string {
           </tr>
         </thead>
 
-        <tbody ref="npcsTableBody">
-          <tr
-            v-for="npc in npcs"
-            :key="npc.id"
-            class="border-b border-default last:border-b-0 hover:bg-elevated/30"
-            :class="isFlagSet(npc.id, 'away') ? 'bg-elevated/20' : ''"
-          >
-            <th class="sticky left-0 z-10 bg-default px-4 py-2 text-left font-medium">
-              <div class="flex items-center gap-3">
-                <div
-                  class="drag-handle shrink-0 cursor-grab text-dimmed hover:text-highlighted active:cursor-grabbing"
-                  :aria-label="`Drag to reorder ${npc.name}`"
-                >
-                  <UIcon
-                    name="i-lucide-grip-vertical"
-                    class="size-4"
-                  />
-                </div>
+        <template v-if="groups.length">
+          <NpcGroupSection
+            v-for="group in groups"
+            :key="group.id"
+            :title="group.name"
+            :npcs="npcsInGroup(group.id)"
+            :players="players"
+            :collapsible="true"
+            :group-id="group.id"
+            @view="npc => infoNpc = npc"
+            @view-group="id => viewGroup = groups.find(candidate => candidate.id === id) ?? null"
+          />
+          <NpcGroupSection
+            v-if="ungroupedNpcs.length"
+            title="Ungrouped"
+            :npcs="ungroupedNpcs"
+            :players="players"
+            :collapsible="true"
+            @view="npc => infoNpc = npc"
+          />
+        </template>
 
-                <button
-                  type="button"
-                  class="flex min-w-0 items-center gap-3 rounded hover:opacity-75"
-                  :aria-label="`View info for ${npc.name}`"
-                  @click="infoNpc = npc"
-                >
-                  <UAvatar
-                    :src="npc.image"
-                    :alt="npc.name"
-                    size="lg"
-                    class="shrink-0"
-                    :class="isFlagSet(npc.id, 'away') ? 'grayscale opacity-50' : ''"
-                  />
-                  <span
-                    class="truncate"
-                    :class="isFlagSet(npc.id, 'away') ? 'text-dimmed line-through' : 'text-highlighted'"
-                  >
-                    {{ npc.name }}
-                  </span>
-                </button>
-
-                <div class="ml-auto flex shrink-0 items-center gap-3">
-                  <UTooltip :text="`Toggle whether ${npc.name}'s name is known`">
-                    <UButton
-                      :icon="'i-lucide-handshake'"
-                      :color="isFlagSet(npc.id, 'introduced') ? 'primary' : 'neutral'"
-                      :variant="isFlagSet(npc.id, 'introduced') ? 'solid' : 'ghost'"
-                      size="xs"
-                      :aria-label="`Toggle whether ${npc.name}'s name is known`"
-                      @click="toggleFlag(npc.id, 'introduced')"
-                    />
-                  </UTooltip>
-
-                  <UTooltip :text="`Toggle whether ${npc.name} has been seen`">
-                    <UButton
-                      :icon="'i-lucide-eye'"
-                      :color="isFlagSet(npc.id, 'seen') ? 'primary' : 'neutral'"
-                      :variant="isFlagSet(npc.id, 'seen') ? 'solid' : 'ghost'"
-                      size="xs"
-                      :aria-label="`Toggle whether ${npc.name} has been seen`"
-                      @click="toggleFlag(npc.id, 'seen')"
-                    />
-                  </UTooltip>
-
-                  <USwitch
-                    :model-value="!isFlagSet(npc.id, 'away')"
-                    :label="isFlagSet(npc.id, 'away') ? 'Away' : 'Present'"
-                    :ui="{ label: 'w-16' }"
-                    size="sm"
-                    :aria-label="`Toggle whether ${npc.name} is present`"
-                    @update:model-value="toggleFlag(npc.id, 'away')"
-                  />
-                </div>
-              </div>
-            </th>
-
-            <td
-              v-for="player in players"
-              :key="player.id"
-              class="px-2 py-2 text-center"
-            >
-              <div class="flex items-center justify-center gap-1">
-                <UButton
-                  icon="i-lucide-minus"
-                  color="neutral"
-                  variant="ghost"
-                  size="xs"
-                  :aria-label="`Lower ${npc.name} points for ${player.name}`"
-                  @click="adjust(npc.id, player.id, -1)"
-                />
-                <span
-                  class="w-8 text-base font-semibold tabular-nums"
-                  :class="pointsClass(pointsFor(npc.id, player.id))"
-                >
-                  {{ pointsFor(npc.id, player.id) }}
-                </span>
-                <UButton
-                  icon="i-lucide-plus"
-                  color="neutral"
-                  variant="ghost"
-                  size="xs"
-                  :aria-label="`Raise ${npc.name} points for ${player.name}`"
-                  @click="adjust(npc.id, player.id, 1)"
-                />
-              </div>
-            </td>
-          </tr>
-        </tbody>
+        <NpcGroupSection
+          v-else
+          title="NPCs"
+          :npcs="npcs"
+          :players="players"
+          :collapsible="false"
+          @view="npc => infoNpc = npc"
+        />
       </table>
     </div>
 
@@ -361,6 +352,80 @@ function pointsClass(value: number): string {
             @click="confirmReset"
           >
             Reset
+          </UButton>
+        </div>
+      </template>
+    </UModal>
+
+    <NpcGroupViewModal
+      :group="viewGroup"
+      :npcs="viewGroup ? npcsInGroup(viewGroup.id) : []"
+      @close="viewGroup = null"
+      @edit="openEditGroup"
+      @delete="requestDeleteGroup"
+      @delete-with-npcs="requestDeleteGroupWithNpcs"
+    />
+
+    <UModal
+      v-model:open="groupModalOpen"
+      :title="editingGroupId ? 'Edit group' : 'Add group'"
+    >
+      <template #body>
+        <div class="flex flex-col gap-4">
+          <UFormField label="Name">
+            <UInput
+              v-model="groupForm.name"
+              class="w-full"
+              placeholder="Group name"
+            />
+          </UFormField>
+        </div>
+      </template>
+
+      <template #footer>
+        <div class="flex justify-end gap-2 w-full">
+          <UButton
+            color="neutral"
+            variant="ghost"
+            @click="groupModalOpen = false"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            color="primary"
+            :disabled="!groupForm.name.trim()"
+            @click="saveGroup"
+          >
+            Save
+          </UButton>
+        </div>
+      </template>
+    </UModal>
+
+    <UModal
+      :open="groupDeleteTarget !== null"
+      title="Remove group?"
+      :description="groupDeleteTarget
+        ? deleteGroupWithNpcs
+          ? `${groupDeleteTarget.name} and its NPCs will be removed. This cannot be undone.`
+          : `${groupDeleteTarget.name} will be removed. NPCs in this group become ungrouped. This cannot be undone.`
+        : ''"
+      @update:open="value => { if (!value) groupDeleteTarget = null }"
+    >
+      <template #footer>
+        <div class="flex justify-end gap-2 w-full">
+          <UButton
+            color="neutral"
+            variant="ghost"
+            @click="groupDeleteTarget = null"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            color="error"
+            @click="confirmRemoveGroup"
+          >
+            Remove
           </UButton>
         </div>
       </template>

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useSortable } from '@vueuse/integrations/useSortable'
-import type { DisplayedKind } from '~/stores/display'
+import type { DisplayMode } from '~/stores/display'
 import type { GalleryImage } from '~/types/cast'
 
 const props = defineProps<{
   title: string
   addLabel: string
-  kind: DisplayedKind
+  kind: DisplayMode & ('item' | 'location')
   images: GalleryImage[]
 }>()
 
@@ -20,6 +20,11 @@ const displayStore = useDisplayStore()
 const { mode } = storeToRefs(displayStore)
 const { isDisplayed, toggleDisplay, setMode } = displayStore
 const { hydrated } = storeToRefs(useHydrationStore())
+
+const locationDisplayStore = useLocationDisplayStore()
+const { isActive: isLocationActive } = locationDisplayStore
+
+const displayTarget = ref<GalleryImage | null>(null)
 
 const sortableImages = ref<GalleryImage[]>([...props.images])
 
@@ -129,6 +134,7 @@ function confirmRemove(): void {
           >
 
           <USwitch
+            v-if="kind === 'item'"
             :model-value="isDisplayed(kind, entry.id)"
             :label="isDisplayed(kind, entry.id) ? 'Shown' : 'Hidden'"
             :ui="{ label: 'w-14 text-white' }"
@@ -137,6 +143,18 @@ function confirmRemove(): void {
             :aria-label="`Toggle whether this ${title.toLowerCase().replace(/s$/, '')} is displayed`"
             @update:model-value="toggleDisplay(kind, entry.id)"
           />
+
+          <UButton
+            v-else
+            :color="isLocationActive(entry.id) ? 'error' : 'neutral'"
+            :variant="isLocationActive(entry.id) ? 'solid' : 'subtle'"
+            icon="i-lucide-monitor"
+            size="xs"
+            class="absolute left-1 top-1"
+            @click="displayTarget = entry"
+          >
+            {{ isLocationActive(entry.id) ? 'Displayed' : 'Display' }}
+          </UButton>
 
           <UButton
             icon="i-lucide-trash-2"
@@ -185,5 +203,11 @@ function confirmRemove(): void {
         </div>
       </template>
     </UModal>
+
+    <LocationDisplayModal
+      v-if="kind === 'location'"
+      :location="displayTarget"
+      @close="displayTarget = null"
+    />
   </section>
 </template>

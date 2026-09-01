@@ -1,7 +1,7 @@
 const DISPLAYED_KEY = 'dm-presenter:displayed'
 
-export type DisplayedKind = 'item' | 'location'
-export type DisplayMode = 'npc' | DisplayedKind
+export type DisplayedKind = 'item'
+export type DisplayMode = 'npc' | DisplayedKind | 'location'
 
 export interface DisplayedEntry {
   kind: DisplayedKind
@@ -44,21 +44,25 @@ export const useDisplayStore = defineStore('display', () => {
       deserialize: (raw) => {
         const parsed: unknown = JSON.parse(raw)
 
-        return isDisplayState(parsed) ? parsed : { mode: 'npc', displayed: [] }
+        return sanitizeDisplayState(parsed)
       }
     }
   }
 })
 
-function isDisplayState(value: unknown): value is DisplayState {
-  return isRecord(value)
-    && (value.mode === 'npc' || value.mode === 'item' || value.mode === 'location')
-    && Array.isArray(value.displayed)
-    && value.displayed.every(isDisplayedEntry)
+function sanitizeDisplayState(value: unknown): DisplayState {
+  const mode = isRecord(value) && (value.mode === 'npc' || value.mode === 'item' || value.mode === 'location')
+    ? value.mode
+    : 'npc'
+  const displayed = isRecord(value) && Array.isArray(value.displayed)
+    ? value.displayed.filter(isDisplayedEntry)
+    : []
+
+  return { mode, displayed }
 }
 
 function isDisplayedEntry(value: unknown): value is DisplayedEntry {
   return isRecord(value)
-    && ((value as { kind?: unknown }).kind === 'item' || (value as { kind?: unknown }).kind === 'location')
+    && (value as { kind?: unknown }).kind === 'item'
     && typeof (value as { id?: unknown }).id === 'string'
 }

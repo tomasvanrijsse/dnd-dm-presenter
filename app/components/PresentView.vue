@@ -13,23 +13,19 @@ const displayStore = useDisplayStore()
 const { mode } = storeToRefs(displayStore)
 const { isDisplayed } = displayStore
 
+const locationDisplayStore = useLocationDisplayStore()
+const { activeLocationId } = storeToRefs(locationDisplayStore)
+const { getFogState } = locationDisplayStore
+
 const { hydrated } = storeToRefs(useHydrationStore())
 
 const presentNpcs = computed(() => hydrated.value ? npcs.value.filter(npc => !isFlagSet(npc.id, 'away')) : [])
 const displayedItems = computed(() => items.value.filter(entry => isDisplayed('item', entry.id)))
-const displayedLocations = computed(() => locations.value.filter(entry => isDisplayed('location', entry.id)))
+const activeLocation = computed(() => activeLocationId.value
+  ? locations.value.find(entry => entry.id === activeLocationId.value) ?? null
+  : null)
 
-const activeEntries = computed(() => {
-  if (mode.value === 'item') {
-    return displayedItems.value
-  }
-
-  if (mode.value === 'location') {
-    return displayedLocations.value
-  }
-
-  return presentNpcs.value
-})
+const activeEntries = computed(() => mode.value === 'item' ? displayedItems.value : presentNpcs.value)
 
 const columns = computed(() => {
   const count = activeEntries.value.length
@@ -89,6 +85,27 @@ useHead({
       </div>
     </template>
 
+    <template v-else-if="mode === 'location'">
+      <div
+        v-if="activeLocation"
+        class="flex h-full w-full items-center justify-center bg-white"
+      >
+        <LocationFogCanvas
+          :image="activeLocation.image"
+          :revealed-rects="getFogState(activeLocation.id).revealedRects"
+          :fog-enabled="getFogState(activeLocation.id).fogEnabled"
+          mode="true-fog"
+        />
+      </div>
+
+      <div
+        v-else-if="hydrated"
+        class="flex h-full w-full items-center justify-center bg-white text-[3cqw] text-white/40"
+      >
+        No locations displayed
+      </div>
+    </template>
+
     <template v-else>
       <div
         v-if="activeEntries.length"
@@ -112,7 +129,7 @@ useHead({
         v-else-if="hydrated"
         class="flex h-full w-full items-center justify-center bg-white text-[3cqw] text-white/40"
       >
-        No {{ mode === 'item' ? 'items' : 'locations' }} displayed
+        No items displayed
       </div>
     </template>
   </div>

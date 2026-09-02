@@ -22,7 +22,15 @@ const { isDisplayed, toggleDisplay, setMode } = displayStore
 const { hydrated } = storeToRefs(useHydrationStore())
 
 const locationDisplayStore = useLocationDisplayStore()
-const { isActive: isLocationActive } = locationDisplayStore
+const { isActive: isLocationActive, showLocation, hideLocation } = locationDisplayStore
+
+function toggleLocationDisplay(id: string): void {
+  if (isLocationActive(id)) {
+    hideLocation()
+  } else {
+    showLocation(id)
+  }
+}
 
 const displayTarget = ref<GalleryImage | null>(null)
 
@@ -144,16 +152,27 @@ function confirmRemove(): void {
             @update:model-value="toggleDisplay(kind, entry.id)"
           />
 
-          <UButton
+          <USwitch
             v-else
-            :color="isLocationActive(entry.id) ? 'error' : 'neutral'"
-            :variant="isLocationActive(entry.id) ? 'solid' : 'subtle'"
-            icon="i-lucide-monitor"
+            :model-value="isLocationActive(entry.id)"
+            :label="isLocationActive(entry.id) ? 'Shown' : 'Hidden'"
+            :ui="{ label: 'w-14 text-white' }"
+            size="sm"
+            class="absolute left-1 top-1 rounded bg-black/50 px-1.5 py-1"
+            :aria-label="`Toggle whether this ${title.toLowerCase().replace(/s$/, '')} is displayed`"
+            @update:model-value="toggleLocationDisplay(entry.id)"
+          />
+
+          <UButton
+            v-if="kind === 'location'"
+            color="neutral"
+            variant="subtle"
+            icon="i-lucide-cloud-fog"
             size="xs"
-            class="absolute left-1 top-1"
+            class="absolute left-1 top-9"
             @click="displayTarget = entry"
           >
-            {{ isLocationActive(entry.id) ? 'Displayed' : 'Display' }}
+            Edit fog
           </UButton>
 
           <UButton

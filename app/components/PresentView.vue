@@ -100,7 +100,7 @@ useHead({
 
       <div
         v-else-if="hydrated"
-        class="flex h-full w-full items-center justify-center bg-white text-[3cqw] text-white/40"
+        class="flex h-full w-full items-center justify-center bg-black text-[3cqw] text-white/40"
       >
         No locations displayed
       </div>

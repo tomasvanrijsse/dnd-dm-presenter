@@ -29,6 +29,14 @@ The `/session-events` page tracks what happens round by round. **Add row** creat
 
 The `/admin` page manages the players used across every other page: add, edit, and remove players (name).
 
+## AI image generation
+
+The `/admin` page also holds the Leonardo.ai API key and the style prompt used when generating NPC portraits
+(the "Generate with AI" option on an NPC form). Get a key at
+[app.leonardo.ai/api-access/api-keys](https://app.leonardo.ai/api-access/api-keys). Tip for the style prompt:
+upload an image whose art style you like into an LLM and ask it to describe that style in words suitable for an
+image-generation prompt, then paste the result in. Both fields are stored only in this browser.
+
 ## Display
 
 **Open display** opens `/present` in a new tab — a full-screen, white-background grid of the portraits of every NPC

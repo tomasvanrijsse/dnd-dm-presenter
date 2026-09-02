@@ -132,22 +132,44 @@ function confirmRemovePlayer(): void {
 
       <section class="mt-8">
         <h2 class="mb-3 text-lg font-semibold text-highlighted">
-          AI image style
+          AI image generation
         </h2>
 
-        <UFormField label="Style prompt">
-          <template #hint>
-            Tip: upload an image you like into an LLM and ask it to describe the art style in words suitable for
-            an image-generation prompt.
-          </template>
+        <div class="flex flex-col gap-4">
+          <UFormField label="Leonardo.ai API key">
+            <template #hint>
+              <a
+                href="https://app.leonardo.ai/api-access/api-keys"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-primary hover:underline"
+              >
+                Create API token
+              </a>
+            </template>
 
-          <UTextarea
-            v-model="imageStyle"
-            class="w-full"
-            :rows="8"
-            placeholder="Describe the art style used for generated NPC portraits"
-          />
-        </UFormField>
+            <UInput
+              v-model="leonardoApiKey"
+              type="password"
+              class="w-full"
+              placeholder="API key"
+            />
+          </UFormField>
+
+          <UFormField label="Style prompt">
+            <template #hint>
+              Tip: upload an image you like into an LLM and ask it to describe the art style in words suitable
+              for an image-generation prompt.
+            </template>
+
+            <UTextarea
+              v-model="imageStyle"
+              class="w-full"
+              :rows="8"
+              placeholder="Describe the art style used for generated NPC portraits"
+            />
+          </UFormField>
+        </div>
       </section>
     </template>
 

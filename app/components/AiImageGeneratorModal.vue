@@ -7,6 +7,7 @@ const open = defineModel<boolean>('open', { default: false })
 const emit = defineEmits<{ accept: [image: GeneratedNpcImage] }>()
 
 const { apiKey } = useLeonardoApiKey()
+const { style } = useLeonardoImageStyle()
 const { npcs } = storeToRefs(useNpcsStore())
 
 const mimicImageStyleOptions = computed(() => npcs.value
@@ -52,6 +53,7 @@ async function generate(): Promise<void> {
       age: props.age,
       role: props.role,
       description: description.value,
+      style: style.value,
       mimicImageStyleReference
     })
   } catch (err) {
@@ -84,25 +86,25 @@ function accept(): void {
   >
     <template #body>
       <div class="flex flex-col gap-4">
-        <UFormField label="Leonardo.ai API key">
-          <template #hint>
-            <a
-              href="https://app.leonardo.ai/api-access/api-keys"
-              target="_blank"
-              rel="noopener noreferrer"
+        <UAlert
+          v-if="!apiKey"
+          color="warning"
+          variant="subtle"
+          icon="i-lucide-triangle-alert"
+          title="No Leonardo.ai API key set"
+          description="Add one on the Admin page before generating images."
+        >
+          <template #description>
+            Add one on the
+            <NuxtLink
+              to="/admin"
               class="text-primary hover:underline"
             >
-              Create API token
-            </a>
+              Admin page
+            </NuxtLink>
+            before generating images.
           </template>
-
-          <UInput
-            v-model="apiKey"
-            type="password"
-            class="w-full"
-            placeholder="API key"
-          />
-        </UFormField>
+        </UAlert>
 
         <UFormField label="Description">
           <UTextarea

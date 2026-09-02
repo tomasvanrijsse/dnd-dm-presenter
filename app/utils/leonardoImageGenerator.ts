@@ -10,12 +10,35 @@ export type LeonardoImageReference
   = | { type: 'GENERATED', id: string }
     | { type: 'BASE64', dataUri: string }
 
+export const DEFAULT_IMAGE_STYLE_PROMPT = `Highly detailed hand-inked fantasy character illustration,
+semi-realistic fantasy concept art, traditional pen-and-ink linework,
+strong clean black contour lines with varied line weight,
+fine hatching and cross-hatching throughout the shadows,
+intricate hand-drawn details,
+subtle cel shading combined with soft painterly color transitions,
+muted warm earthy color palette, burgundy, dark brown, ivory,
+aged gold and bronze metallic accents,
+rich material textures for leather, cloth and metal,
+sharp expressive facial features,
+realistic anatomy with slightly stylized fantasy proportions,
+highly detailed medieval fantasy costume,
+dramatic but controlled lighting,
+crisp illustrated edges,
+visible pen texture,
+professional tabletop RPG character concept art,
+full upper-body portrait,
+front-facing or three-quarter pose,
+centered composition,
+isolated on a clean white background,
+no scenery, no frame, no text.`
+
 export interface NpcImagePrompt {
   species: string
   gender: string
   age: string
   role: string
   description: string
+  style: string
   mimicImageStyleReference?: LeonardoImageReference
 }
 
@@ -37,31 +60,10 @@ export async function generateLeonardoNpcImage(apiKey: string, promptInput: NpcI
   return { image: await convertImageFileToWebp(await imageResponse.blob()), leonardoImageId: generatedImage.id }
 }
 
-function buildPrompt({ species, gender, age, role, description }: NpcImagePrompt): string {
+function buildPrompt({ species, gender, age, role, description, style }: NpcImagePrompt): string {
   const subject = [age, gender, role].map(part => part.trim()).filter(Boolean).join(' ')
-  const base = `Portrait of a ${subject || 'fantasy character'} of ${species} species.` +
-    `Style:
-    Highly detailed hand-inked fantasy character illustration,
-    semi-realistic fantasy concept art, traditional pen-and-ink linework,
-    strong clean black contour lines with varied line weight,
-    fine hatching and cross-hatching throughout the shadows,
-    intricate hand-drawn details,
-    subtle cel shading combined with soft painterly color transitions,
-    muted warm earthy color palette, burgundy, dark brown, ivory,
-    aged gold and bronze metallic accents,
-    rich material textures for leather, cloth and metal,
-    sharp expressive facial features,
-    realistic anatomy with slightly stylized fantasy proportions,
-    highly detailed medieval fantasy costume,
-    dramatic but controlled lighting,
-    crisp illustrated edges,
-    visible pen texture,
-    professional tabletop RPG character concept art,
-    full upper-body portrait,
-    front-facing or three-quarter pose,
-    centered composition,
-    isolated on a clean white background,
-    no scenery, no frame, no text.`
+  const base = `Portrait of a ${subject || 'fantasy character'} of ${species} species.`
+    + `Style: ${style.trim() || DEFAULT_IMAGE_STYLE_PROMPT}`
 
   return description.trim() ? `${base}. Character description: ${description.trim()}` : base
 }

@@ -6,6 +6,8 @@ const { players } = storeToRefs(playersStore)
 const { addPlayer, updatePlayer, removePlayer } = playersStore
 
 const { hydrated } = storeToRefs(useHydrationStore())
+const { apiKey: leonardoApiKey } = useLeonardoApiKey()
+const { style: imageStyle } = useLeonardoImageStyle()
 
 const playerModalOpen = ref(false)
 const editingPlayerId = ref<string | null>(null)
@@ -126,6 +128,26 @@ function confirmRemovePlayer(): void {
             </li>
           </ul>
         </div>
+      </section>
+
+      <section class="mt-8">
+        <h2 class="mb-3 text-lg font-semibold text-highlighted">
+          AI image style
+        </h2>
+
+        <UFormField label="Style prompt">
+          <template #hint>
+            Tip: upload an image you like into an LLM and ask it to describe the art style in words suitable for
+            an image-generation prompt.
+          </template>
+
+          <UTextarea
+            v-model="imageStyle"
+            class="w-full"
+            :rows="8"
+            placeholder="Describe the art style used for generated NPC portraits"
+          />
+        </UFormField>
       </section>
     </template>
 

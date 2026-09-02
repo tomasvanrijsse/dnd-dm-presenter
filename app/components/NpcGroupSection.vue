@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useSortable } from '@vueuse/integrations/useSortable'
+import type Sortable from 'sortablejs'
 import type { Npc, Player } from '~/types/cast'
 
 const props = defineProps<{
@@ -16,26 +17,54 @@ const emit = defineEmits<{
 }>()
 
 const npcsStore = useNpcsStore()
-const { isFlagSet, toggleFlag, reorderSubset } = npcsStore
+const { isFlagSet, toggleFlag, updateNpc, reorderSubset } = npcsStore
 
 const pointsStore = usePointsStore()
 const { pointsFor, adjust } = pointsStore
 
 const collapsed = ref(false)
 
-const rows = computed({
-  get: () => props.npcs,
-  set: (value) => {
-    reorderSubset(value.map(npc => npc.id))
-  }
-})
+const UNGROUPED = '__ungrouped__'
 
 const rowsBody = ref<HTMLElement | null>(null)
 
-useSortable(rowsBody, rows, {
+function onDragEnd(event: Sortable.SortableEvent): void {
+  const npcId = event.item.dataset.npcId
+  const toEl = event.to
+  const fromEl = event.from
+
+  if (!npcId || !toEl || !fromEl || event.oldIndex === undefined || event.newIndex === undefined) {
+    return
+  }
+
+  const targetGroupId = toEl.dataset.groupId === UNGROUPED ? undefined : toEl.dataset.groupId
+  const beforeId = event.newIndex > 0 ? (toEl.children[event.newIndex - 1] as HTMLElement | undefined)?.dataset.npcId ?? null : null
+
+  if (fromEl !== toEl || event.oldIndex !== event.newIndex) {
+    toEl.removeChild(event.item)
+    fromEl.insertBefore(event.item, fromEl.children[event.oldIndex] ?? null)
+  }
+
+  nextTick(() => {
+    updateNpc(npcId, { groupId: targetGroupId })
+
+    const targetMembers = npcsStore.npcs
+      .filter(npc => npc.groupId === targetGroupId && npc.id !== npcId)
+      .map(npc => npc.id)
+    const insertAt = beforeId ? targetMembers.indexOf(beforeId) + 1 : 0
+    const orderedIds = [...targetMembers.slice(0, insertAt), npcId, ...targetMembers.slice(insertAt)]
+
+    reorderSubset(orderedIds)
+  })
+}
+
+useSortable(rowsBody, computed(() => props.npcs), {
   handle: '.drag-handle',
   animation: 150,
-  watchElement: true
+  watchElement: true,
+  group: 'npc-rows',
+  onUpdate: () => {},
+  onEnd: onDragEnd
 })
 
 function pointsClass(value: number): string {
@@ -90,10 +119,12 @@ function pointsClass(value: number): string {
   <tbody
     v-show="!collapsed"
     ref="rowsBody"
+    :data-group-id="groupId ?? UNGROUPED"
   >
     <tr
       v-for="npc in npcs"
       :key="npc.id"
+      :data-npc-id="npc.id"
       class="border-b border-default last:border-b-0 hover:bg-elevated/30"
       :class="isFlagSet(npc.id, 'away') ? 'bg-elevated/20' : ''"
     >

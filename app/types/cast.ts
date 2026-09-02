@@ -8,6 +8,7 @@ export interface Npc {
   age?: string
   role?: string
   description: string
+  appearanceDescription?: string
   away: boolean
   introduced: boolean
   seen: boolean

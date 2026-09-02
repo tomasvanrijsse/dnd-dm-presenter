@@ -4,6 +4,7 @@ import type { GeneratedNpcImage, LeonardoImageReference } from '~/utils/leonardo
 
 const props = defineProps<{ species: string, gender: string, age: string, role: string }>()
 const open = defineModel<boolean>('open', { default: false })
+const description = defineModel<string>('appearanceDescription', { default: '' })
 const emit = defineEmits<{ accept: [image: GeneratedNpcImage] }>()
 
 const { apiKey } = useLeonardoApiKey()
@@ -18,7 +19,6 @@ const mimicImageStyleOptions = computed(() => npcs.value
     avatar: { src: npc.image }
   })))
 
-const description = ref('')
 const mimicImageStyleNpcId = ref('')
 
 const isGenerating = ref(false)
@@ -92,7 +92,6 @@ function accept(): void {
           variant="subtle"
           icon="i-lucide-triangle-alert"
           title="No Leonardo.ai API key set"
-          description="Add one on the Admin page before generating images."
         >
           <template #description>
             Add one on the
@@ -106,11 +105,11 @@ function accept(): void {
           </template>
         </UAlert>
 
-        <UFormField label="Description">
+        <UFormField label="Appearance description">
           <UTextarea
             v-model="description"
             class="w-full"
-            placeholder="Extra details for the portrait"
+            placeholder="e.g. mood, weight, scars, clothing, items carried"
           />
         </UFormField>
 

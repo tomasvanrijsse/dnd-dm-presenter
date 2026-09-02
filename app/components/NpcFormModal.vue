@@ -26,6 +26,7 @@ const form = reactive({
   age: '',
   role: '',
   description: '',
+  appearanceDescription: '',
   groupId: undefined as string | undefined
 })
 
@@ -42,6 +43,7 @@ watch(open, (isOpen) => {
   form.age = props.npc?.age ?? ''
   form.role = props.npc?.role ?? ''
   form.description = props.npc?.description ?? ''
+  form.appearanceDescription = props.npc?.appearanceDescription ?? ''
   form.groupId = props.npc?.groupId ?? NO_GROUP
   aiValidationAttempted.value = false
 })
@@ -71,6 +73,7 @@ function save(): void {
     age: form.age,
     role: form.role.trim(),
     description: form.description.trim(),
+    appearanceDescription: form.appearanceDescription.trim(),
     groupId: form.groupId === NO_GROUP ? undefined : form.groupId
   }
 
@@ -240,6 +243,7 @@ function onAiImageAccepted(generated: GeneratedNpcImage): void {
 
   <AiImageGeneratorModal
     v-model:open="aiGeneratorOpen"
+    v-model:appearance-description="form.appearanceDescription"
     :species="form.species"
     :gender="form.gender"
     :age="form.age"

@@ -13,15 +13,15 @@ export const useItemsStore = defineStore('items', () => {
     items.value = items.value.filter(entry => entry.id !== id)
   }
 
-  function renameItem(id: string, name: string): void {
-    items.value = items.value.map(entry => entry.id === id ? { ...entry, name } : entry)
+  function updateItem(id: string, input: { name: string, image: string }): void {
+    items.value = items.value.map(entry => entry.id === id ? { ...entry, ...input } : entry)
   }
 
   function reorderItems(orderedIds: string[]): void {
     items.value = reorderById(items.value, orderedIds)
   }
 
-  return { items, addItem, removeItem, renameItem, reorderItems }
+  return { items, addItem, removeItem, updateItem, reorderItems }
 }, {
   persist: {
     key: ITEMS_KEY,

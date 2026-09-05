@@ -11,8 +11,9 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  add: [file: File]
+  add: [file: File, name?: string]
   remove: [id: string]
+  rename: [id: string, name: string]
   reorder: [orderedIds: string[]]
 }>()
 
@@ -54,15 +55,53 @@ useSortable(gridEl, sortableImages, {
 
 const fileInput = ref<HTMLInputElement | null>(null)
 
+const nameModalOpen = ref(false)
+const nameInput = ref('')
+const pendingFile = ref<File | null>(null)
+const renameTargetId = ref<string | null>(null)
+
 function onFileChange(event: Event): void {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
 
   if (file) {
-    emit('add', file)
+    if (props.kind === 'item') {
+      pendingFile.value = file
+      renameTargetId.value = null
+      nameInput.value = ''
+      nameModalOpen.value = true
+    } else {
+      emit('add', file)
+    }
   }
 
   input.value = ''
+}
+
+function openRename(entry: GalleryImage): void {
+  pendingFile.value = null
+  renameTargetId.value = entry.id
+  nameInput.value = entry.name ?? ''
+  nameModalOpen.value = true
+}
+
+function confirmName(): void {
+  const name = nameInput.value.trim()
+
+  if (pendingFile.value) {
+    emit('add', pendingFile.value, name)
+  } else if (renameTargetId.value) {
+    emit('rename', renameTargetId.value, name)
+  }
+
+  closeNameModal()
+}
+
+function closeNameModal(): void {
+  nameModalOpen.value = false
+  pendingFile.value = null
+  renameTargetId.value = null
+  nameInput.value = ''
 }
 
 const deleteTarget = ref<GalleryImage | null>(null)
@@ -185,6 +224,24 @@ function confirmRemove(): void {
             @click="deleteTarget = entry"
           />
 
+          <UButton
+            v-if="kind === 'item'"
+            icon="i-lucide-pencil"
+            color="neutral"
+            variant="solid"
+            size="xs"
+            class="absolute right-1 top-9 opacity-0 transition-opacity group-hover:opacity-100"
+            aria-label="Edit item name"
+            @click="openRename(entry)"
+          />
+
+          <div
+            v-if="kind === 'item' && entry.name"
+            class="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-black/60 px-2 py-1 pr-8 text-center text-xs text-white"
+          >
+            {{ entry.name }}
+          </div>
+
           <div
             class="drag-handle absolute bottom-1 right-1 cursor-grab rounded bg-black/50 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
             :aria-label="`Drag to reorder ${title.toLowerCase()}`"
@@ -218,6 +275,42 @@ function confirmRemove(): void {
             @click="confirmRemove"
           >
             Remove
+          </UButton>
+        </div>
+      </template>
+    </UModal>
+
+    <UModal
+      :open="nameModalOpen"
+      :title="renameTargetId ? 'Edit item name' : 'Name this item'"
+      @update:open="value => { if (!value) closeNameModal() }"
+    >
+      <template #body>
+        <UFormField label="Name">
+          <UInput
+            v-model="nameInput"
+            class="w-full"
+            placeholder="Item name"
+            autofocus
+            @keyup.enter="confirmName"
+          />
+        </UFormField>
+      </template>
+
+      <template #footer>
+        <div class="flex justify-end gap-2 w-full">
+          <UButton
+            color="neutral"
+            variant="ghost"
+            @click="closeNameModal"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            color="primary"
+            @click="confirmName"
+          >
+            {{ renameTargetId ? 'Save' : 'Add item' }}
           </UButton>
         </div>
       </template>

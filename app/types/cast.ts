@@ -28,6 +28,7 @@ export interface NpcGroup {
 export interface GalleryImage {
   id: string
   image: string
+  name?: string
 }
 
 export type Item = GalleryImage

@@ -82,7 +82,7 @@ const { players } = storeToRefs(playersStore)
 
 const itemsStore = useItemsStore()
 const { items } = storeToRefs(itemsStore)
-const { addItem, removeItem, reorderItems } = itemsStore
+const { addItem, removeItem, renameItem, reorderItems } = itemsStore
 
 const locationsStore = useLocationsStore()
 const { locations } = storeToRefs(locationsStore)
@@ -156,8 +156,8 @@ function confirmRemoveNpc(): void {
   npcDeleteTarget.value = null
 }
 
-async function onAddItem(file: File): Promise<void> {
-  addItem(await convertImageFileToWebp(file))
+async function onAddItem(file: File, name?: string): Promise<void> {
+  addItem(await convertImageFileToWebp(file), name?.trim() ?? '')
 }
 
 async function onAddLocation(file: File): Promise<void> {
@@ -319,6 +319,7 @@ async function onAddLocation(file: File): Promise<void> {
         :images="items"
         @add="onAddItem"
         @remove="removeItem"
+        @rename="renameItem"
         @reorder="reorderItems"
       />
 

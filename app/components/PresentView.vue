@@ -115,13 +115,20 @@ useHead({
         <div
           v-for="entry in activeEntries"
           :key="entry.id"
-          class="flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden"
+          class="flex h-full min-h-0 w-full min-w-0 flex-col items-center justify-center overflow-hidden"
         >
           <img
             :src="entry.image"
             alt=""
-            class="max-h-full max-w-full object-contain"
+            class="block min-h-0 w-full flex-1 object-contain"
           >
+
+          <div
+            v-if="entry.name"
+            class="tangerine-bold shrink-0 bg-white py-1 text-center text-[4cqw] text-black"
+          >
+            {{ entry.name }}
+          </div>
         </div>
       </div>
 

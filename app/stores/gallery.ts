@@ -6,19 +6,23 @@ const LOCATIONS_KEY = 'dm-presenter:locations'
 export const useItemsStore = defineStore('items', () => {
   const items = ref<GalleryImage[]>([])
 
-  function addItem(image: string): void {
-    items.value = [...items.value, { id: crypto.randomUUID(), image }]
+  function addItem(image: string, name = ''): void {
+    items.value = [...items.value, { id: crypto.randomUUID(), image, name }]
   }
 
   function removeItem(id: string): void {
     items.value = items.value.filter(entry => entry.id !== id)
   }
 
+  function renameItem(id: string, name: string): void {
+    items.value = items.value.map(entry => entry.id === id ? { ...entry, name } : entry)
+  }
+
   function reorderItems(orderedIds: string[]): void {
     items.value = reorderById(items.value, orderedIds)
   }
 
-  return { items, addItem, removeItem, reorderItems }
+  return { items, addItem, removeItem, renameItem, reorderItems }
 }, {
   persist: { key: ITEMS_KEY, ...fieldPersistence('items', isGalleryImageArray, () => []) }
 })
@@ -48,5 +52,6 @@ function isGalleryImageArray(value: unknown): value is GalleryImage[] {
     isRecord(entry)
     && typeof entry.id === 'string'
     && typeof entry.image === 'string'
+    && (entry.name === undefined || typeof entry.name === 'string')
   )
 }

@@ -25,12 +25,20 @@ export interface NpcGroup {
   name: string
 }
 
+// The shape GalleryGrid renders; each gallery store owns its own entry type below.
 export interface GalleryImage {
   id: string
   image: string
   name?: string
 }
 
-export type Item = GalleryImage
+export interface Item {
+  id: string
+  image: string
+  name: string
+}
 
-export type Location = GalleryImage
+export interface Location {
+  id: string
+  image: string
+}

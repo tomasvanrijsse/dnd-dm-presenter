@@ -158,7 +158,7 @@ function pointsClass(value: number): string {
               class="truncate"
               :class="isFlagSet(npc.id, 'away') ? 'text-dimmed line-through' : 'text-highlighted'"
             >
-              {{ npc.name }}
+              {{ npc.displayName ? `${npc.displayName} (${npc.name})` : npc.name }}
             </span>
           </button>
 

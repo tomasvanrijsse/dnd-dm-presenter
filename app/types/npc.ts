@@ -1,6 +1,7 @@
 export interface Npc {
   id: string
   name: string
+  displayName?: string
   image: string
   leonardoImageId?: string
   species?: string

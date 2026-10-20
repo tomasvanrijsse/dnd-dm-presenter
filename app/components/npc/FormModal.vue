@@ -19,6 +19,7 @@ const AGE_OPTIONS = ['Child', 'Teenager', 'Young adult', 'Adult', 'Middle-aged',
 
 const form = reactive({
   name: '',
+  displayName: '',
   image: '',
   leonardoImageId: undefined as string | undefined,
   species: '',
@@ -36,6 +37,7 @@ watch(open, (isOpen) => {
   }
 
   form.name = props.npc?.name ?? ''
+  form.displayName = props.npc?.displayName ?? ''
   form.image = props.npc?.image ?? ''
   form.leonardoImageId = props.npc?.leonardoImageId
   form.species = props.npc?.species ?? ''
@@ -66,6 +68,7 @@ async function onImageFileChange(file: File | null | undefined): Promise<void> {
 function save(): void {
   const input = {
     name: form.name.trim(),
+    displayName: form.displayName.trim() || undefined,
     image: form.image.trim(),
     leonardoImageId: form.leonardoImageId,
     species: form.species,
@@ -122,6 +125,17 @@ function onAiImageAccepted(generated: GeneratedNpcImage): void {
             v-model="form.name"
             class="w-full"
             placeholder="NPC name"
+          />
+        </UFormField>
+
+        <UFormField
+          label="Display name"
+          help="Shown to the players instead of the name. Leave empty to show the name."
+        >
+          <UInput
+            v-model="form.displayName"
+            class="w-full"
+            placeholder="e.g. The hooded stranger"
           />
         </UFormField>
 

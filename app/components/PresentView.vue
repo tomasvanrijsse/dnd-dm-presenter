@@ -65,7 +65,7 @@ useHead({
         >
           <StoredImage
             :image="npc.image"
-            :alt="npc.name"
+            :alt="npc.displayName || npc.name"
             class="block min-h-0 w-full flex-1 object-contain"
             :class="isFlagSet(npc.id, 'seen') ? '' : 'blur-xl'"
           />
@@ -74,7 +74,7 @@ useHead({
             v-if="isFlagSet(npc.id, 'introduced')"
             class="metamorphous shrink-0 bg-white py-1 text-center text-[4cqw] text-black"
           >
-            {{ npc.name }}
+            {{ npc.displayName || npc.name }}
           </div>
         </div>
       </div>

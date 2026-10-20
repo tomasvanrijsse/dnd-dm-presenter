@@ -66,10 +66,9 @@ export function useStateBackup() {
       throw new Error('Invalid state file')
     }
 
-    assertRestorableImages(parsed)
-
     await clearImageBlobs()
     await restoreImageBlobs(files)
+    await rewriteLegacyImageFields(parsed)
 
     removeSessionDataKeys()
 
@@ -139,10 +138,9 @@ async function restoreImageBlobs(files: Record<string, Uint8Array>): Promise<voi
   }
 }
 
-// Zips written before images moved to IndexedDB hold an images/<id> path or an inline data URI in the
-// entry's image field. Those are no longer restorable, so say so instead of loading entries whose
-// images silently resolve to nothing.
-function assertRestorableImages(entries: Record<string, string>): void {
+// Zips written before images moved to IndexedDB hold either an images/<id> path or an inline data URI
+// in the entry's image field; both become references to a stored blob.
+async function rewriteLegacyImageFields(entries: Record<string, string>): Promise<void> {
   for (const key of IMAGE_STORE_KEYS) {
     const raw = entries[key]
 
@@ -156,10 +154,32 @@ function assertRestorableImages(entries: Record<string, string>): void {
       continue
     }
 
-    if (parsed.some(entry => isRecord(entry) && typeof entry.image === 'string' && entry.image && !isImageRef(entry.image))) {
-      throw new Error('This save file was made before images moved to IndexedDB and can no longer be restored')
+    const rewritten = []
+
+    for (const entry of parsed) {
+      rewritten.push(isImageOwner(entry) ? { ...entry, image: await imageReferenceFor(entry.image) } : entry)
     }
+
+    entries[key] = JSON.stringify(rewritten)
   }
+}
+
+async function imageReferenceFor(image: string): Promise<string> {
+  const zippedId = imageIdFromPath(image)
+
+  if (zippedId) {
+    return imageRefFor(zippedId)
+  }
+
+  if (!isLegacyDataUri(image)) {
+    return image
+  }
+
+  return await putImageBlob(await (await fetch(image)).blob())
+}
+
+function isImageOwner(value: unknown): value is ImageOwner {
+  return isRecord(value) && typeof value.image === 'string'
 }
 
 function imageIdFromPath(path: string): string | null {

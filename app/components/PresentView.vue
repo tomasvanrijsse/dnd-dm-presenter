@@ -152,6 +152,9 @@ useHead({
 }
 
 .name-glow {
-  text-shadow: 0 0 0.05em white, 0 0 0.1em white, 0 0 0.2em white, 0 0 0.3em white;
+  /* paint-order puts the stroke behind the glyph, so the outline doesn't eat into the black letters */
+  -webkit-text-stroke: 0.15em white;
+  paint-order: stroke fill;
+  text-shadow: 0 0 0.2em white, 0 0 0.4em white;
 }
 </style>

@@ -5,7 +5,8 @@ import type { GeneratedNpcImage } from '~/utils/leonardoImageGenerator'
 const props = defineProps<{ npc?: Npc | null }>()
 const open = defineModel<boolean>('open', { default: false })
 
-const { addNpc, updateNpc } = useNpcsStore()
+const npcsStore = useNpcsStore()
+const { addNpc, updateNpc } = npcsStore
 
 const { groups } = storeToRefs(useNpcGroupsStore())
 const NO_GROUP = '__none__'
@@ -136,6 +137,13 @@ const variationGeneratorOpen = ref(false)
 function onVariationAccepted(variation: NpcImage): void {
   form.images.push(variation)
   form.activeImage = variation.image
+
+  // Generated images cost credits, so keep them even when the form is cancelled.
+  const stored = npcsStore.npcs.find(npc => npc.id === props.npc?.id)
+
+  if (stored) {
+    updateNpc(stored.id, { images: [...stored.images, variation] })
+  }
 }
 </script>
 

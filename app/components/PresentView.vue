@@ -61,7 +61,7 @@ useHead({
         <div
           v-for="npc in presentNpcs"
           :key="npc.id"
-          class="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden"
+          class="relative flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden"
         >
           <StoredImage
             :image="npc.image"
@@ -72,7 +72,7 @@ useHead({
 
           <div
             v-if="isFlagSet(npc.id, 'introduced')"
-            class="metamorphous shrink-0 bg-white py-1 text-center text-[4cqw] text-black"
+            class="metamorphous name-glow absolute inset-x-0 bottom-0 py-1 text-center text-[4cqw] text-black"
           >
             {{ npc.displayName || npc.name }}
           </div>
@@ -149,5 +149,9 @@ useHead({
   font-family: "Metamorphous", serif;
   font-weight: 400;
   font-style: normal;
+}
+
+.name-glow {
+  text-shadow: 0 0 0.05em white, 0 0 0.1em white, 0 0 0.2em white, 0 0 0.3em white;
 }
 </style>

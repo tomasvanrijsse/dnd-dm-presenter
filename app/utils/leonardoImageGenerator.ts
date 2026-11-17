@@ -3,7 +3,7 @@ const API_BASE_V2 = 'https://cloud.leonardo.ai/api/rest/v2'
 const POLL_INTERVAL_MS = 2000
 const POLL_TIMEOUT_MS = 90000
 const MIMIC_IMAGE_STYLE_REFERENCE_STRENGTH = 'MID'
-const VARIATION_REFERENCE_STRENGTH = 'HIGH'
+const APPEARANCE_REFERENCE_STRENGTH = 'HIGH'
 const GENERATION_SIZE = 1024
 const MODEL = 'flux-pro-2.0'
 
@@ -41,6 +41,7 @@ export interface NpcImagePrompt {
   description: string
   style: string
   mimicImageStyleReference?: LeonardoImageReference
+  appearanceReference?: LeonardoImageReference
 }
 
 export interface GeneratedNpcImage {
@@ -49,6 +50,12 @@ export interface GeneratedNpcImage {
 }
 
 export async function generateLeonardoNpcImage(apiKey: string, promptInput: NpcImagePrompt): Promise<GeneratedNpcImage> {
+  if (promptInput.appearanceReference) {
+    const prompt = `${buildPrompt(promptInput)}. Keep the character from the reference image: the same face, build and art style.`
+
+    return await generateImage(apiKey, prompt, promptInput.appearanceReference, APPEARANCE_REFERENCE_STRENGTH)
+  }
+
   const reference = promptInput.mimicImageStyleReference ?? null
 
   return await generateImage(apiKey, buildPrompt(promptInput), reference, MIMIC_IMAGE_STYLE_REFERENCE_STRENGTH)
@@ -62,7 +69,7 @@ export async function generateLeonardoNpcImageVariation(
   const prompt = 'Recreate the reference image exactly: the same character, face, pose, clothing, art style, colors, '
     + `framing and background. Only change this: ${variation.trim()}`
 
-  return await generateImage(apiKey, prompt, source, VARIATION_REFERENCE_STRENGTH)
+  return await generateImage(apiKey, prompt, source, APPEARANCE_REFERENCE_STRENGTH)
 }
 
 export async function leonardoReferenceFor(source: { image: string, leonardoImageId?: string }): Promise<LeonardoImageReference | undefined> {

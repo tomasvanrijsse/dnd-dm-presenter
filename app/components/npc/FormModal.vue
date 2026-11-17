@@ -342,6 +342,7 @@ function onVariationAccepted(variation: NpcImage): void {
     :gender="form.gender"
     :age="form.age"
     :role="form.role"
+    :current-image="activeImage"
     @accept="onAiImageAccepted"
   />
 

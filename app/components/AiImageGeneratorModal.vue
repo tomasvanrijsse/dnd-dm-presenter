@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import type { GeneratedNpcImage } from '~/utils/leonardoImageGenerator'
 
-const props = defineProps<{ species: string, gender: string, age: string, role: string }>()
+const props = defineProps<{
+  species: string
+  gender: string
+  age: string
+  role: string
+  currentImage?: { image: string, leonardoImageId?: string } | null
+}>()
 const open = defineModel<boolean>('open', { default: false })
 const description = defineModel<string>('appearanceDescription', { default: '' })
 const emit = defineEmits<{ accept: [image: GeneratedNpcImage] }>()
@@ -35,6 +41,9 @@ const isGenerating = ref(false)
 const error = ref('')
 const generatedImage = ref<GeneratedNpcImage | null>(null)
 
+const maintainAppearance = ref(false)
+const appearanceSource = computed(() => generatedImage.value ?? props.currentImage ?? null)
+
 watch(open, (isOpen) => {
   if (!isOpen) {
     return
@@ -42,6 +51,7 @@ watch(open, (isOpen) => {
 
   error.value = ''
   generatedImage.value = null
+  maintainAppearance.value = false
 
   void loadMimicImageStyleThumbnails()
 })
@@ -51,6 +61,8 @@ async function generate(): Promise<void> {
     return
   }
 
+  const appearance = maintainAppearance.value ? appearanceSource.value : null
+
   isGenerating.value = true
   error.value = ''
   generatedImage.value = null
@@ -58,6 +70,7 @@ async function generate(): Promise<void> {
   try {
     const mimicImageStyleNpc = npcs.value.find(npc => npc.id === mimicImageStyleNpcId.value)
     const mimicImageStyleReference = mimicImageStyleNpc ? await leonardoReferenceFor(mimicImageStyleNpc) : undefined
+    const appearanceReference = appearance ? await leonardoReferenceFor(appearance) : undefined
 
     generatedImage.value = await generateLeonardoNpcImage(apiKey.value, {
       species: props.species,
@@ -66,7 +79,8 @@ async function generate(): Promise<void> {
       role: props.role,
       description: description.value,
       style: style.value,
-      mimicImageStyleReference
+      mimicImageStyleReference,
+      appearanceReference
     })
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to generate image'
@@ -119,7 +133,19 @@ function accept(): void {
           />
         </UFormField>
 
-        <UFormField label="Mimic Image Style">
+        <UCheckbox
+          v-if="appearanceSource"
+          v-model="maintainAppearance"
+          label="Maintain appearance"
+          :description="generatedImage
+            ? 'Keep the look of the image below and only apply your changes.'
+            : 'Keep the look of the current image and only apply your changes.'"
+        />
+
+        <UFormField
+          v-if="!maintainAppearance"
+          label="Mimic Image Style"
+        >
           <USelectMenu
             v-model="mimicImageStyleNpcId"
             :items="mimicImageStyleOptions"

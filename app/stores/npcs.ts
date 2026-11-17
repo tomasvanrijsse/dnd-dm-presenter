@@ -1,4 +1,4 @@
-import type { Npc } from '~/types/npc'
+import type { Npc, NpcImage } from '~/types/npc'
 
 export const NPCS_KEY = 'dm-presenter:npcs'
 
@@ -12,11 +12,13 @@ export const useNpcsStore = defineStore('npcs', () => {
   }
 
   function updateNpc(id: string, patch: Partial<Omit<Npc, 'id'>>): void {
-    const replaced = replacedImages(npcs.value, id, patch.image)
+    const before = npcs.value.find(npc => npc.id === id)
 
     npcs.value = npcs.value.map(npc => npc.id === id ? { ...npc, ...patch } : npc)
 
-    void releaseImages(replaced)
+    const kept = new Set(npcs.value.filter(npc => npc.id === id).flatMap(imageOwners).map(owner => owner.image))
+
+    void releaseImages(before ? imageOwners(before).filter(owner => !kept.has(owner.image)) : [])
   }
 
   function removeNpc(id: string): void {
@@ -24,7 +26,15 @@ export const useNpcsStore = defineStore('npcs', () => {
 
     npcs.value = npcs.value.filter(npc => npc.id !== id)
 
-    void releaseImages(removed)
+    void releaseImages(removed.flatMap(imageOwners))
+  }
+
+  function selectImage(id: string, image: string): void {
+    const selected = npcs.value.find(npc => npc.id === id)?.images.find(entry => entry.image === image)
+
+    if (selected) {
+      updateNpc(id, { image: selected.image, leonardoImageId: selected.leonardoImageId })
+    }
   }
 
   function isFlagSet(id: string, flag: NpcFlag): boolean {
@@ -65,6 +75,7 @@ export const useNpcsStore = defineStore('npcs', () => {
     addNpc,
     updateNpc,
     removeNpc,
+    selectImage,
     isFlagSet,
     toggleFlag,
     allAway,
@@ -83,13 +94,13 @@ export const useNpcsStore = defineStore('npcs', () => {
           return { npcs: [] }
         }
 
-        return { npcs: parsed.map(npc => ({ away: false, introduced: false, seen: true, ...npc })) }
+        return { npcs: parsed.map(npc => ({ away: false, introduced: false, seen: true, images: defaultImages(npc), ...npc })) }
       }
     }
   }
 })
 
-export type StoredNpc = Omit<Npc, 'away' | 'introduced' | 'seen'> & Partial<Pick<Npc, 'away' | 'introduced' | 'seen'>>
+export type StoredNpc = Omit<Npc, 'away' | 'introduced' | 'seen' | 'images'> & Partial<Pick<Npc, 'away' | 'introduced' | 'seen' | 'images'>>
 
 export function isStoredNpcArray(value: unknown): value is StoredNpc[] {
   return Array.isArray(value) && value.every(entry =>
@@ -98,5 +109,20 @@ export function isStoredNpcArray(value: unknown): value is StoredNpc[] {
     && typeof entry.name === 'string'
     && typeof entry.image === 'string'
     && typeof entry.description === 'string'
+    && (entry.images === undefined || isNpcImageArray(entry.images))
   )
+}
+
+function isNpcImageArray(value: unknown): value is NpcImage[] {
+  return Array.isArray(value) && value.every(entry =>
+    isRecord(entry) && typeof entry.image === 'string' && typeof entry.label === 'string'
+  )
+}
+
+function defaultImages(npc: StoredNpc): NpcImage[] {
+  return npc.image ? [{ image: npc.image, label: 'Default', leonardoImageId: npc.leonardoImageId }] : []
+}
+
+function imageOwners(npc: Npc): ImageOwner[] {
+  return [npc, ...npc.images]
 }

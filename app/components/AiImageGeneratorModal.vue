@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { Npc } from '~/types/npc'
-import type { GeneratedNpcImage, LeonardoImageReference } from '~/utils/leonardoImageGenerator'
+import type { GeneratedNpcImage } from '~/utils/leonardoImageGenerator'
 
 const props = defineProps<{ species: string, gender: string, age: string, role: string }>()
 const open = defineModel<boolean>('open', { default: false })
@@ -58,7 +57,7 @@ async function generate(): Promise<void> {
 
   try {
     const mimicImageStyleNpc = npcs.value.find(npc => npc.id === mimicImageStyleNpcId.value)
-    const mimicImageStyleReference = mimicImageStyleNpc ? await resolveMimicImageStyleReference(mimicImageStyleNpc) : undefined
+    const mimicImageStyleReference = mimicImageStyleNpc ? await leonardoReferenceFor(mimicImageStyleNpc) : undefined
 
     generatedImage.value = await generateLeonardoNpcImage(apiKey.value, {
       species: props.species,
@@ -74,16 +73,6 @@ async function generate(): Promise<void> {
   } finally {
     isGenerating.value = false
   }
-}
-
-async function resolveMimicImageStyleReference(npc: Npc): Promise<LeonardoImageReference | undefined> {
-  if (npc.leonardoImageId) {
-    return { type: 'GENERATED', id: npc.leonardoImageId }
-  }
-
-  const blob = await loadImageBlob(npc.image)
-
-  return blob ? { type: 'BASE64', dataUri: await blobToDataUri(blob) } : undefined
 }
 
 function accept(): void {

@@ -6,7 +6,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
 async function deleteOrphanedImages(): Promise<void> {
   const referenced = new Set([
-    ...useNpcsStore().npcs,
+    ...useNpcsStore().npcs.flatMap(npc => [npc, ...npc.images]),
     ...useItemsStore().items,
     ...useLocationsStore().locations
   ].map(entry => entry.image))

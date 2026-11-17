@@ -18,7 +18,7 @@ const emit = defineEmits<{
 }>()
 
 const npcsStore = useNpcsStore()
-const { isFlagSet, toggleFlag, updateNpc, reorderSubset } = npcsStore
+const { isFlagSet, toggleFlag, updateNpc, selectImage, reorderSubset } = npcsStore
 
 const pointsStore = usePointsStore()
 const { pointsFor, adjust } = pointsStore
@@ -163,6 +163,17 @@ function pointsClass(value: number): string {
           </button>
 
           <div class="ml-auto flex shrink-0 items-center gap-3">
+            <USelect
+              v-if="npc.images.length > 1"
+              :model-value="npc.image"
+              :items="npc.images.map(entry => ({ label: entry.label, value: entry.image }))"
+              value-key="value"
+              size="xs"
+              class="w-24"
+              :aria-label="`Choose which image of ${npc.name} is shown`"
+              @update:model-value="image => selectImage(npc.id, image)"
+            />
+
             <UTooltip :text="`Toggle whether ${npc.name}'s name is known`">
               <UButton
                 :icon="'i-lucide-handshake'"

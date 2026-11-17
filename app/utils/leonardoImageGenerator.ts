@@ -3,6 +3,7 @@ const API_BASE_V2 = 'https://cloud.leonardo.ai/api/rest/v2'
 const POLL_INTERVAL_MS = 2000
 const POLL_TIMEOUT_MS = 90000
 const MIMIC_IMAGE_STYLE_REFERENCE_STRENGTH = 'MID'
+const VARIATION_REFERENCE_STRENGTH = 'HIGH'
 const GENERATION_SIZE = 1024
 const MODEL = 'flux-pro-2.0'
 
@@ -48,8 +49,39 @@ export interface GeneratedNpcImage {
 }
 
 export async function generateLeonardoNpcImage(apiKey: string, promptInput: NpcImagePrompt): Promise<GeneratedNpcImage> {
-  const prompt = buildPrompt(promptInput)
-  const generationId = await startGeneration(apiKey, prompt, promptInput.mimicImageStyleReference ?? null)
+  const reference = promptInput.mimicImageStyleReference ?? null
+
+  return await generateImage(apiKey, buildPrompt(promptInput), reference, MIMIC_IMAGE_STYLE_REFERENCE_STRENGTH)
+}
+
+export async function generateLeonardoNpcImageVariation(
+  apiKey: string,
+  source: LeonardoImageReference,
+  variation: string
+): Promise<GeneratedNpcImage> {
+  const prompt = 'Recreate the reference image exactly: the same character, face, pose, clothing, art style, colors, '
+    + `framing and background. Only change this: ${variation.trim()}`
+
+  return await generateImage(apiKey, prompt, source, VARIATION_REFERENCE_STRENGTH)
+}
+
+export async function leonardoReferenceFor(source: { image: string, leonardoImageId?: string }): Promise<LeonardoImageReference | undefined> {
+  if (source.leonardoImageId) {
+    return { type: 'GENERATED', id: source.leonardoImageId }
+  }
+
+  const blob = await loadImageBlob(source.image)
+
+  return blob ? { type: 'BASE64', dataUri: await blobToDataUri(blob) } : undefined
+}
+
+async function generateImage(
+  apiKey: string,
+  prompt: string,
+  reference: LeonardoImageReference | null,
+  referenceStrength: string
+): Promise<GeneratedNpcImage> {
+  const generationId = await startGeneration(apiKey, prompt, reference, referenceStrength)
   const generatedImage = await pollForGeneratedImage(apiKey, generationId)
   const imageResponse = await fetch(generatedImage.url)
 
@@ -77,7 +109,8 @@ function authHeaders(apiKey: string): Record<string, string> {
 async function startGeneration(
   apiKey: string,
   prompt: string,
-  mimicImageStyleReference: LeonardoImageReference | null
+  reference: LeonardoImageReference | null,
+  referenceStrength: string
 ): Promise<string> {
   const parameters: Record<string, unknown> = {
     prompt,
@@ -87,13 +120,13 @@ async function startGeneration(
     prompt_enhance: 'OFF'
   }
 
-  if (mimicImageStyleReference) {
-    const image = mimicImageStyleReference.type === 'BASE64'
-      ? { url: mimicImageStyleReference.dataUri, type: 'BASE64' }
-      : { id: mimicImageStyleReference.id, type: mimicImageStyleReference.type }
+  if (reference) {
+    const image = reference.type === 'BASE64'
+      ? { url: reference.dataUri, type: 'BASE64' }
+      : { id: reference.id, type: reference.type }
 
     parameters.guidances = {
-      image_reference: [{ image, strength: MIMIC_IMAGE_STYLE_REFERENCE_STRENGTH }]
+      image_reference: [{ image, strength: referenceStrength }]
     }
   }
 

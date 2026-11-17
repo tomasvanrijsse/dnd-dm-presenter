@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Npc } from '~/types/npc'
+import type { Npc, NpcImage } from '~/types/npc'
 import type { GeneratedNpcImage } from '~/utils/leonardoImageGenerator'
 
 const props = defineProps<{ npc?: Npc | null }>()
@@ -20,8 +20,8 @@ const AGE_OPTIONS = ['Child', 'Teenager', 'Young adult', 'Adult', 'Middle-aged',
 const form = reactive({
   name: '',
   displayName: '',
-  image: '',
-  leonardoImageId: undefined as string | undefined,
+  images: [] as NpcImage[],
+  activeImage: '',
   species: '',
   gender: '',
   age: '',
@@ -38,8 +38,8 @@ watch(open, (isOpen) => {
 
   form.name = props.npc?.name ?? ''
   form.displayName = props.npc?.displayName ?? ''
-  form.image = props.npc?.image ?? ''
-  form.leonardoImageId = props.npc?.leonardoImageId
+  form.images = props.npc?.images.map(entry => ({ ...entry })) ?? []
+  form.activeImage = props.npc?.image ?? ''
   form.species = props.npc?.species ?? ''
   form.gender = props.npc?.gender ?? ''
   form.age = props.npc?.age ?? ''
@@ -61,16 +61,36 @@ async function onImageFileChange(file: File | null | undefined): Promise<void> {
     return
   }
 
-  form.image = await putImageBlob(await convertImageFileToWebpBlob(file, PORTRAIT_IMAGE_ENCODING))
-  form.leonardoImageId = undefined
+  replaceActiveImage({ image: await putImageBlob(await convertImageFileToWebpBlob(file, PORTRAIT_IMAGE_ENCODING)) })
+}
+
+const activeImage = computed(() => form.images.find(entry => entry.image === form.activeImage) ?? null)
+
+function replaceActiveImage(next: Omit<NpcImage, 'label'>): void {
+  if (activeImage.value) {
+    Object.assign(activeImage.value, { leonardoImageId: undefined, ...next })
+  } else {
+    form.images.push({ label: 'Default', ...next })
+  }
+
+  form.activeImage = next.image
+}
+
+function removeImage(image: string): void {
+  form.images = form.images.filter(entry => entry.image !== image)
+
+  if (form.activeImage === image) {
+    form.activeImage = form.images[0]?.image ?? ''
+  }
 }
 
 function save(): void {
   const input = {
     name: form.name.trim(),
     displayName: form.displayName.trim() || undefined,
-    image: form.image.trim(),
-    leonardoImageId: form.leonardoImageId,
+    image: activeImage.value?.image ?? '',
+    leonardoImageId: activeImage.value?.leonardoImageId,
+    images: form.images.map(entry => ({ ...entry, label: entry.label.trim() })),
     species: form.species,
     gender: form.gender.trim(),
     age: form.age,
@@ -107,9 +127,15 @@ function openAiGenerator(): void {
 }
 
 function onAiImageAccepted(generated: GeneratedNpcImage): void {
-  form.image = generated.image
-  form.leonardoImageId = generated.leonardoImageId
+  replaceActiveImage(generated)
   save()
+}
+
+const variationGeneratorOpen = ref(false)
+
+function onVariationAccepted(variation: NpcImage): void {
+  form.images.push(variation)
+  form.activeImage = variation.image
 }
 </script>
 
@@ -224,6 +250,57 @@ function onAiImageAccepted(generated: GeneratedNpcImage): void {
           </div>
         </UFormField>
 
+        <UFormField
+          v-if="form.images.length"
+          label="Images"
+          help="The highlighted image is shown. With more than one image you can switch from the NPC overview."
+        >
+          <div class="flex flex-col gap-2">
+            <div
+              v-for="entry in form.images"
+              :key="entry.image"
+              class="flex items-center gap-3"
+            >
+              <button
+                type="button"
+                class="shrink-0 rounded-full"
+                :aria-label="`Show ${entry.label || 'this image'}`"
+                @click="form.activeImage = entry.image"
+              >
+                <StoredAvatar
+                  :image="entry.image"
+                  :alt="entry.label"
+                  size="lg"
+                  :class="entry.image === form.activeImage ? 'ring-2 ring-primary' : 'opacity-60'"
+                />
+              </button>
+              <UInput
+                v-model="entry.label"
+                class="flex-1"
+                placeholder="e.g. Angry"
+              />
+              <UButton
+                icon="i-lucide-trash-2"
+                color="error"
+                variant="ghost"
+                :aria-label="`Remove ${entry.label || 'this image'}`"
+                @click="removeImage(entry.image)"
+              />
+            </div>
+
+            <UButton
+              color="neutral"
+              variant="subtle"
+              icon="i-lucide-sparkles"
+              class="self-start"
+              :disabled="!activeImage"
+              @click="variationGeneratorOpen = true"
+            >
+              Generate variation of highlighted image
+            </UButton>
+          </div>
+        </UFormField>
+
         <UFormField label="Description">
           <RichTextEditor v-model="form.description" />
         </UFormField>
@@ -258,5 +335,11 @@ function onAiImageAccepted(generated: GeneratedNpcImage): void {
     :age="form.age"
     :role="form.role"
     @accept="onAiImageAccepted"
+  />
+
+  <NpcVariationModal
+    v-model:open="variationGeneratorOpen"
+    :source="activeImage"
+    @accept="onVariationAccepted"
   />
 </template>

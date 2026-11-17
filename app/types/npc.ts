@@ -4,6 +4,7 @@ export interface Npc {
   displayName?: string
   image: string
   leonardoImageId?: string
+  images: NpcImage[]
   species?: string
   gender?: string
   age?: string
@@ -14,6 +15,12 @@ export interface Npc {
   introduced: boolean
   seen: boolean
   groupId?: string
+}
+
+export interface NpcImage {
+  image: string
+  label: string
+  leonardoImageId?: string
 }
 
 export interface NpcGroup {
